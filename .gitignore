@@ -3,6 +3,8 @@
 *.lo
 *.o
 *.obj
+*.d
+*.cpp.o.d
 
 # Precompiled Headers
 *.gch
@@ -27,3 +29,7 @@
 *.exe
 *.out
 *.app
+
+# IDE
+*.project
+*.mk

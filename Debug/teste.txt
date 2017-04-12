@@ -1,0 +1,11 @@
+program teste;
+
+procedure testando
+begin
+end;
+
+begin
+  a : Integer;
+  b := 15;
+  a := 1.5;
+end.

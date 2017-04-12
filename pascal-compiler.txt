@@ -1,0 +1,1 @@
+./Debug/AnalisadorLexico.cpp.o ./Debug/Token.cpp.o ./Debug/main.cpp.o   
