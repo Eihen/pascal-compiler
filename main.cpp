@@ -13,5 +13,6 @@ int main() {
 	//cin >> nomeArquivo;
     
     AnalisadorLexico analisadorLexico(nomeArquivo.c_str());
+    analisadorLexico.analisar();
     return 0;
 }
