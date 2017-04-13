@@ -27,9 +27,10 @@ void AnalisadorLexico::analisar()
 	string linha, palavra;
     char c;
     while (getline(file, linha)) {
+		linha += '\n';
         for (int i = 0, n = linha.length(); i < n; i++) {
             c = linha[i];
-
+			
             if (Util::isSeparator(c)) {
                 processaToken(palavra);
                 palavra.clear();
@@ -76,9 +77,6 @@ void AnalisadorLexico::analisar()
                     c = linha[i++]; //TODO e se o i não estiver no vetor? erro na análise ou bola pra frente?
                     palavra.push_back(c);
                 } while (c != '\'');
-                
-                processaToken(palavra);
-                palavra.clear();
             }
             else
                 palavra.push_back(c);
@@ -95,10 +93,10 @@ void AnalisadorLexico::exibirTabela()
 	cout.width(32);
 	cout.fill(' ');	
 	cout << "Tabela de tokens" << endl;				//Título da tabela
-	cout << "Lexema" << "\t" << "Token" << endl;	//Colunas
+	cout << "Lexema" << "\t\t" << "Token" << endl;	//Colunas
 	for(Token token : tokens)
     {
-		cout << token.getValue() << "\t";
+		cout << token.getValue() << "\t\t";
 		
 		switch(token.getTipo())
 		{
@@ -117,6 +115,12 @@ void AnalisadorLexico::exibirTabela()
 			case Token::TIPO_KEYWORD:
 				cout << "Palavra chave";
 			break;
+			case Token::TIPO_OPERADOR:
+				cout << "Operador";
+			break;
+			case Token::TIPO_SYMBOL:
+				cout << "Símbolo";
+			break;
 		}
 		cout << endl;
 	}
@@ -127,10 +131,10 @@ void AnalisadorLexico::gerarArquivo()
 	ofstream outFile;
 	outFile.open("saida.txt");
 	outFile << "Tabela de tokens" << endl;				//Título da tabela
-	outFile << "Lexema" << "\t" << "Token" << endl;		//Colunas
+	outFile << "Lexema" << "\t\t" << "Token" << endl;		//Colunas
 	for(Token token : tokens)
 	{
-		outFile << token.getValue() << "\t";
+		outFile << token.getValue() << "\t\t";
 		
 		switch(token.getTipo())
 		{
@@ -148,6 +152,12 @@ void AnalisadorLexico::gerarArquivo()
 			break;
 			case Token::TIPO_KEYWORD:
 				outFile << "Palavra chave";
+				break;
+			case Token::TIPO_OPERADOR:
+				outFile << "Operador";
+			break;
+			case Token::TIPO_SYMBOL:
+				outFile << "Símbolo";
 			break;
 		}
 		outFile << endl;

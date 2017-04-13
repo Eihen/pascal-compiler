@@ -1,4 +1,5 @@
 #include "Util.h"
+#include <iostream>
 
 Util::Util()
 {
@@ -17,6 +18,13 @@ bool Util::isOperator(char ch) {
            ch == '+' || ch == '-'  || ch == '/' || ch == '*' || 
            ch == '<' || ch== '>' || 
            ch == '&' || ch == '|' || ch == '!' || ch == '~';
+}
+
+bool Util::isOperator(string operador) {
+	return (operador.length() == 1 && isOperator(operador[0])) || 
+	operador == "<<" || operador == ">>" ||
+	operador == ">=" || operador == "<=" || operador == "<>" ||
+	operador == ":=";
 }
 
 bool Util::operadorPrefixo(char ch) {
@@ -59,6 +67,7 @@ bool Util::isInteger(string s) {
 			return false;
 		}
 	} 
+	cout << s << endl;
     return true;
 }
 
