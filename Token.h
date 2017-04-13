@@ -7,6 +7,9 @@ using namespace std;
 
 class Token
 {
+private:	
+	int mTipo;
+	string mValue;
 public:
     static const int TIPO_FLOAT = 0;
     static const int TIPO_INT = 1;

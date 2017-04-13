@@ -1,9 +1,6 @@
 #include "Token.h"
 #include "Util.h"
 
-int mTipo;
-string mValue;
-    
 Token::Token(string val) {
     mValue = val;
     if (Util::isKeyword(mValue))
