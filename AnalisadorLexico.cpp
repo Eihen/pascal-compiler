@@ -120,6 +120,39 @@ void AnalisadorLexico::exibirTabela()
 	}
 }
 
+void AnalisadorLexico::gerarArquivo()
+{
+	ofstream outFile;
+	outFile.open("saida.txt");
+	outFile << "Tabela de tokens" << endl;				//Título da tabela
+	outFile << "Lexema" << "\t" << "Token" << endl;		//Colunas
+	for(list<Token>::iterator it = tokens.begin(); it != tokens.end(); it++)
+	{
+		outFile << it->mValue << "\t";
+		
+		switch(it->mTipo)
+		{
+			case 0:
+				outFile << "Número com ponto flutuante";
+			break;
+			case 1:
+				outFile << "Número inteiro";
+			break;
+			case 2:
+				outFile << "Cadeia de caracteres";
+			break;
+			case 3:
+				outFile << "Identificador";
+			break;
+			case 4:
+				outFile << "Palavra chave";
+			break;
+		}
+		outFile << endl;
+	}
+	outFile.close();
+}
+
 AnalisadorLexico::~AnalisadorLexico()
 {
 }
