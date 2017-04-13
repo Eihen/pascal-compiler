@@ -8,4 +8,8 @@ begin
   a : Integer;
   b := 15;
   a := 1.5;
+  c := 'asygasyg''aygsyasg';
+  d := 'asdiuadhsiu'hsaduaish';
+  e := asduhasud';
+  f := 'asduhausdha;
 end.
