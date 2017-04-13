@@ -13,11 +13,14 @@ bool Util::isSymbol(char ch) {
 }
 
 bool Util::isOperator(char ch) {
-    return ch == '+' || ch == '-' || ch == '=' || ch == '/' || ch =='*' || ch =='%' || ch =='<' || ch=='>';
+    return ch == ':' || ch == '=' || ch == '%' ||
+           ch == '+' || ch == '-'  || ch == '/' || ch == '*' || 
+           ch == '<' || ch== '>' || 
+           ch == '&' || ch == '|' || ch == '!' || ch == '~';
 }
 
-bool Util::isDelimiter(char ch) {
-    return isSeparator(ch) || isSymbol(ch) || isOperator(ch);
+bool Util::operadorPrefixo(char ch) {
+    return ch == ':' || ch == '<' || ch == '>';
 }
 
 bool Util::isString(string s) {

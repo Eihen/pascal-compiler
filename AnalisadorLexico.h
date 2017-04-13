@@ -15,6 +15,7 @@ public:
     void analisar();
 private:
     void processaToken(string palavra);
+    void exibirTabela();
 };
 
 #endif // ANALISADORLEXICO_H

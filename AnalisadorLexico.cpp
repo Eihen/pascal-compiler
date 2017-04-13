@@ -30,15 +30,39 @@ void AnalisadorLexico::analisar()
         for (int i = 0, n = linha.length(); i < n; i++) {
             c = linha[i];
 
-            if (Util::isDelimiter(c)) {
-                processaToken(palavra); //processa o que já está na palavra
+            if (Util::isSeparator(c)) {
+                processaToken(palavra);
+                palavra.clear();
+            }
+            else if (Util::isSymbol(c)) {
+                //processa palavra anterior 
+                processaToken(palavra); 
                 palavra.clear();
                 
-                if (!Util::isSeparator(c)) { //se é um operador ou um símbolo, adiciona à lista de tokens
-                    palavra.push_back(c);
-                    processaToken(palavra);
-                    palavra.clear();
+                //processa símbolo
+                palavra.push_back(c);
+                processaToken(palavra);
+                palavra.clear();
+            }
+            else if (Util::isOperator(c)) {
+                //processa palavra anterior
+                processaToken(palavra); 
+                palavra.clear();
+                
+                palavra.push_back(c);
+                
+                //tratamento de símbolos de 2 caracteres
+                if (Util::operadorPrefixo(c) && i + 1 < n) {
+                    char proximo = linha[i + 1];
+                    if ((c == '<' && (proximo == '>' || proximo == '<' || proximo == '=')) || // <> ou << ou <=
+                        (c == '>' && (proximo == '>' || proximo == '='))) { // >> ou >=
+                        palavra.push_back(proximo); 
+                    }
                 }
+                
+                //processa símbolo
+                processaToken(palavra);
+                palavra.clear();
             }
             else if (c == '\'') {
                 processaToken(palavra); //processa o que já estava lido, já que uma aspas inicial também é um separador
@@ -60,7 +84,7 @@ void AnalisadorLexico::analisar()
     }
     
     //Teste - modificar arquivo
-    //TODO printa lista
+    exibirTabela();
 }
 
 void AnalisadorLexico::exibirTabela()
@@ -70,25 +94,25 @@ void AnalisadorLexico::exibirTabela()
 	cout.fill(' ');	
 	cout << "Tabela de tokens" << endl;				//Título da tabela
 	cout << "Lexema" << "\t" << "Token" << endl;	//Colunas
-	for(list<Token>::iterator it = list.begin(); it != list.end(); it++)
-	{
-		cout << it->mValue << "\t";
+	for(list<Token>::iterator it = tokens.begin(); it != tokens.end(); it++)
+    {
+		cout << it->getValue() << "\t";
 		
-		switch(it->mTipo)
+		switch(it->getTipo())
 		{
-			case 0:
+			case Token::TIPO_FLOAT:
 				cout << "Número com ponto flutuante";
 			break;
-			case 0:
+			case Token::TIPO_INT:
 				cout << "Número inteiro";
 			break;
-			case 0:
+			case Token::TIPO_STRING:
 				cout << "Cadeia de caracteres";
 			break;
-			case 0:
+			case Token::TIPO_IDENTIFICADOR:
 				cout << "Identificador";
 			break;
-			case 0:
+			case Token::TIPO_KEYWORD:
 				cout << "Palavra chave";
 			break;
 		}
