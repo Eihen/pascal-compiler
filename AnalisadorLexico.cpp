@@ -1,7 +1,10 @@
 #include "AnalisadorLexico.h"
 #include "Util.h"
 #include "Token.h"
+#include <stdio.h>
 #include <list>
+
+using namespace std;
 
 ifstream file;
 list<Token> tokens;
@@ -58,6 +61,39 @@ void AnalisadorLexico::analisar()
     
     //Teste - modificar arquivo
     //TODO printa lista
+}
+
+void AnalisadorLexico::exibirTabela()
+{
+	cout << endl;
+	cout.width(32);
+	cout.fill(' ');	
+	cout << "Tabela de tokens" << endl;				//Título da tabela
+	cout << "Lexema" << "\t" << "Token" << endl;	//Colunas
+	for(list<Token>::iterator it = list.begin(); it != list.end(); it++)
+	{
+		cout << it->mValue << "\t";
+		
+		switch(it->mTipo)
+		{
+			case 0:
+				cout << "Número com ponto flutuante";
+			break;
+			case 0:
+				cout << "Número inteiro";
+			break;
+			case 0:
+				cout << "Cadeia de caracteres";
+			break;
+			case 0:
+				cout << "Identificador";
+			break;
+			case 0:
+				cout << "Palavra chave";
+			break;
+		}
+		cout << endl;
+	}
 }
 
 AnalisadorLexico::~AnalisadorLexico()
