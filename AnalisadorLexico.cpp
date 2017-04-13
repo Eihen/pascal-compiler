@@ -28,8 +28,14 @@ void AnalisadorLexico::analisar()
             c = linha[i];
 
             if (Util::isDelimiter(c)) {
-                processaToken(palavra);
+                processaToken(palavra); //processa o que já está na palavra
                 palavra.clear();
+                
+                if (!Util::isSeparator(c)) { //se é um operador ou um símbolo, adiciona à lista de tokens
+                    palavra.push_back(c);
+                    processaToken(palavra);
+                    palavra.clear();
+                }
             }
             else if (c == '"') {
                 processaToken(palavra); //processa o que já estava lido, já que uma aspas inicial também é um separador

@@ -8,12 +8,8 @@ bool Util::isSeparator(char ch) {
     return ch == ' ' || ch == '\t' || ch == '\n';
 }
 
-bool Util::isComma(char ch) {
-    return ch == ',';
-}
-
 bool Util::isSymbol(char ch) {
-    return ch == '(' || ch == ')' || ch == '{' || ch == '}' || ch ==';' || ch == '[' || ch == ']';
+    return ch == '(' || ch == ')' || ch == '{' || ch == '}' || ch ==';' || ch == ',' || ch == '[' || ch == ']';
 }
 
 bool Util::isOperator(char ch) {
@@ -21,7 +17,7 @@ bool Util::isOperator(char ch) {
 }
 
 bool Util::isDelimiter(char ch) {
-    return isSeparator(ch) || isComma(ch) || isSymbol(ch) || isOperator(ch);
+    return isSeparator(ch) || isSymbol(ch) || isOperator(ch);
 }
 
 bool Util::isString(string s) {
