@@ -56,6 +56,7 @@ void AnalisadorLexico::analisar()
         }
     }
     
+    //Teste - modificar arquivo
     //TODO printa lista
 }
 
