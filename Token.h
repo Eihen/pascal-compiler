@@ -1,10 +1,14 @@
 #ifndef TOKEN_H
 #define TOKEN_H
 
+#include <string>
+
+using namespace std;
+
 class Token
 {
 public:
-	Token();
+	Token(string val);
 	~Token();
 
 };
