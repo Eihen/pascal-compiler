@@ -58,6 +58,7 @@ void AnalisadorLexico::analisar()
                         (c == '>' && (proximo == '>' || proximo == '=')) ||
                         (c == ':' && proximo == '=')) { // >> ou >=
                         palavra.push_back(proximo); 
+                        i++;
                     }
                 }
                 
