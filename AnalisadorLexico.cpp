@@ -55,7 +55,8 @@ void AnalisadorLexico::analisar()
                 if (Util::operadorPrefixo(c) && i + 1 < n) {
                     char proximo = linha[i + 1];
                     if ((c == '<' && (proximo == '>' || proximo == '<' || proximo == '=')) || // <> ou << ou <=
-                        (c == '>' && (proximo == '>' || proximo == '='))) { // >> ou >=
+                        (c == '>' && (proximo == '>' || proximo == '=')) ||
+                        (c == ':' && proximo == '=')) { // >> ou >=
                         palavra.push_back(proximo); 
                     }
                 }
@@ -94,11 +95,11 @@ void AnalisadorLexico::exibirTabela()
 	cout.fill(' ');	
 	cout << "Tabela de tokens" << endl;				//Título da tabela
 	cout << "Lexema" << "\t" << "Token" << endl;	//Colunas
-	for(list<Token>::iterator it = tokens.begin(); it != tokens.end(); it++)
+	for(Token token : tokens)
     {
-		cout << it->getValue() << "\t";
+		cout << token.getValue() << "\t";
 		
-		switch(it->getTipo())
+		switch(token.getTipo())
 		{
 			case Token::TIPO_FLOAT:
 				cout << "Número com ponto flutuante";
@@ -126,25 +127,25 @@ void AnalisadorLexico::gerarArquivo()
 	outFile.open("saida.txt");
 	outFile << "Tabela de tokens" << endl;				//Título da tabela
 	outFile << "Lexema" << "\t" << "Token" << endl;		//Colunas
-	for(list<Token>::iterator it = tokens.begin(); it != tokens.end(); it++)
+	for(Token token : tokens)
 	{
-		outFile << it->mValue << "\t";
+		outFile << token.getValue() << "\t";
 		
-		switch(it->mTipo)
+		switch(token.getTipo())
 		{
-			case 0:
+			case Token::TIPO_FLOAT:
 				outFile << "Número com ponto flutuante";
 			break;
-			case 1:
+			case Token::TIPO_INT:
 				outFile << "Número inteiro";
 			break;
-			case 2:
+			case Token::TIPO_STRING:
 				outFile << "Cadeia de caracteres";
 			break;
-			case 3:
+			case Token::TIPO_IDENTIFICADOR:
 				outFile << "Identificador";
 			break;
-			case 4:
+			case Token::TIPO_KEYWORD:
 				outFile << "Palavra chave";
 			break;
 		}
