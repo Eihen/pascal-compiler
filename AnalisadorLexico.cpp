@@ -37,7 +37,7 @@ void AnalisadorLexico::analisar()
                     palavra.clear();
                 }
             }
-            else if (c == '"') {
+            else if (c == '\'') {
                 processaToken(palavra); //processa o que já estava lido, já que uma aspas inicial também é um separador
                 palavra.clear();
                 
@@ -46,7 +46,7 @@ void AnalisadorLexico::analisar()
                 do {
                     c = linha[i++]; //TODO e se o i não estiver no vetor? erro na análise ou bola pra frente?
                     palavra.push_back(c);
-                } while (c != '"');
+                } while (c != '\'');
                 
                 processaToken(palavra);
                 palavra.clear();
