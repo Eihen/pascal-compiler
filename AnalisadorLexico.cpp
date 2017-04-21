@@ -1,25 +1,36 @@
 #include "AnalisadorLexico.h"
 #include "Util.h"
-#include "Token.h"
+#include "StringToken.h"
+#include "NumberToken.h"
+#include "OperatorToken.h"
+#include "SymbolToken.h"
 #include <stdio.h>
-#include <list>
 
 using namespace std;
-
-ifstream file;
-list<Token> tokens;
 
 AnalisadorLexico::AnalisadorLexico(const char* nomeArquivo)
 {
 	file.open(nomeArquivo);
 }
 
-void AnalisadorLexico::processaToken(string palavra)
-{
-    if (palavra.length() > 0) {
-        Token token(palavra);
-        tokens.push_back(token);
-    }
+void AnalisadorLexico::processaTokenNumerico(string palavra) {
+    NumberToken token(palavra);
+    tokens.push_back(palavra);
+}
+
+void AnalisadorLexico::processaTokenSimbolo(string palavra) {
+    SymbolToken token(palavra);
+    tokens.push_back(token);
+}
+
+void AnalisadorLexico::processaTokenString(string palavra) {
+    StringToken token(palavra);
+    tokens.push_back(token);
+}
+
+void AnalisadorLexico::processaTokenOperador(string palavra) {
+    OperatorToken token(palavra);
+    tokens.push_back(token);
 }
 
 void AnalisadorLexico::analisar()
@@ -30,56 +41,107 @@ void AnalisadorLexico::analisar()
 		linha += '\n';
         for (int i = 0, n = linha.length(); i < n; i++) {
             c = linha[i];
-			
-            if (Util::isSeparator(c)) {
-                processaToken(palavra);
-                palavra.clear();
-            }
-            else if (Util::isSymbol(c)) {
-                //processa palavra anterior 
-                processaToken(palavra); 
-                palavra.clear();
+            
+            //leitura de número
+            if (NumberToken::isNumber(c)) {
+                palavra = c;
                 
+                //lê N dígitos
+                for (i = i + 1; i < n; i++) {
+                    c = linha[i];
+                    if (NumberToken::isNumber(c))
+                        palavra += c;
+                    //leitura ponto flutuante
+                    else if (c == '.') {
+                        palavra += c;
+                        for (i = i + 1; i < n; i++) {
+                            //lê N dígitos; ao encontrar delimitador, finaliza token
+                            c = linha[i];
+                            if (NumberToken::isNumber(c))
+                                palavra += c;
+                            //TODO verificar aqui se é outro "." e fazer algo a respeito
+                            else if (Util::isDelimiter(c)) {
+                                processaTokenNumerico(palavra);
+                                i--;
+                                break;
+                            }
+                            //TODO else erro léxico
+                        }
+                        break;
+                    }
+                    //número inteiro encontrado
+                    else if (Util::isDelimiter(c)) {
+                        processaTokenNumerico(palavra);
+                        i--;
+                        break;
+                    }
+                    //TODO else erro léxico
+                }
+                    
+            }
+            //leitura de identificador/palavra reservada
+			else if (StringToken::isLetter(c)) {
+                palavra = c;
+                for (i = i + 1; i < n; i++) {
+                    c = linha[i];
+                    if (NumberToken::isNumber(c) || StringToken::isLetter(c))
+                        palavra += c;
+                    else if (Util::isDelimiter(c)){
+                        processaTokenString(palavra);
+                        i--;
+                        break;
+                    }
+                    //TODO else erro léxico
+                }
+            }
+            else if (SymbolToken::isSymbol(c)) {
                 //processa símbolo
-                palavra.push_back(c);
-                processaToken(palavra);
-                palavra.clear();
+                palavra = c;
+                processaTokenSimbolo(palavra);
             }
-            else if (Util::isOperator(c)) {
-                //processa palavra anterior
-                processaToken(palavra); 
-                palavra.clear();
-                
-                palavra.push_back(c);
+            else if (OperatorToken::isOperator(c)) {
+                palavra = c;
                 
                 //tratamento de símbolos de 2 caracteres
-                if (Util::operadorPrefixo(c) && i + 1 < n) {
+                if (OperatorToken::operadorPrefixo(c) && i + 1 < n) {
                     char proximo = linha[i + 1];
                     if ((c == '<' && (proximo == '>' || proximo == '<' || proximo == '=')) || // <> ou << ou <=
                         (c == '>' && (proximo == '>' || proximo == '=')) ||
                         (c == ':' && proximo == '=')) { // >> ou >=
-                        palavra.push_back(proximo); 
+                        palavra += proximo; 
                         i++;
                     }
                 }
                 
-                //processa símbolo
-                processaToken(palavra);
-                palavra.clear();
+                //processa operador
+                processaTokenOperador(palavra);
             }
             else if (c == '\'') {
-                processaToken(palavra); //processa o que já estava lido, já que uma aspas inicial também é um separador
-                palavra.clear();
-                
                 //lê string
-                palavra.push_back(c);
-                do {
-                    c = linha[i++]; //TODO e se o i não estiver no vetor? erro na análise ou bola pra frente?
-                    palavra.push_back(c);
-                } while (c != '\'');
+                palavra = c;
+                for (i = i + 1; i < n; i++) {
+                    c = linha[i];
+                    if (c == '\'') {
+                        palavra += c;
+                        if (i + 1 < n) {
+                            c = linha[++i];
+                            //verifica se o apóstrofo foi escapado
+                            if (c == '\'') {
+                                palavra += c;
+                            }
+                            else if (Util::isDelimiter(c)) {
+                                processaTokenString(palavra);
+                                i--;
+                                break;
+                            }
+                            //TODO else erro léxico
+                        }
+                        //TODO else erro léxico
+                    }
+                    else
+                        palavra += c;
+                }
             }
-            else
-                palavra.push_back(c);
         }
     }
     
@@ -100,25 +162,25 @@ void AnalisadorLexico::exibirTabela()
 		
 		switch(token.getTipo())
 		{
-			case Token::TIPO_FLOAT:
+			case NumberToken::TIPO_FLOAT:
 				cout << "Número com ponto flutuante";
 			break;
-			case Token::TIPO_INT:
+			case NumberToken::TIPO_INT:
 				cout << "Número inteiro";
 			break;
-			case Token::TIPO_STRING:
+			case StringToken::TIPO_STRING:
 				cout << "Cadeia de caracteres";
 			break;
-			case Token::TIPO_IDENTIFICADOR:
+			case StringToken::TIPO_IDENTIFICADOR:
 				cout << "Identificador";
 			break;
-			case Token::TIPO_KEYWORD:
+			case StringToken::TIPO_KEYWORD:
 				cout << "Palavra chave";
 			break;
-			case Token::TIPO_OPERADOR:
+			case OperatorToken::TIPO_OPERADOR:
 				cout << "Operador";
 			break;
-			case Token::TIPO_SYMBOL:
+			case SymbolToken::TIPO_SIMBOLO:
 				cout << "Símbolo";
 			break;
 		}
@@ -138,25 +200,25 @@ void AnalisadorLexico::gerarArquivo()
 		
 		switch(token.getTipo())
 		{
-			case Token::TIPO_FLOAT:
+			case NumberToken::TIPO_FLOAT:
 				outFile << "Número com ponto flutuante";
 			break;
-			case Token::TIPO_INT:
+			case NumberToken::TIPO_INT:
 				outFile << "Número inteiro";
 			break;
-			case Token::TIPO_STRING:
+			case StringToken::TIPO_STRING:
 				outFile << "Cadeia de caracteres";
 			break;
-			case Token::TIPO_IDENTIFICADOR:
+			case StringToken::TIPO_IDENTIFICADOR:
 				outFile << "Identificador";
 			break;
-			case Token::TIPO_KEYWORD:
+			case StringToken::TIPO_KEYWORD:
 				outFile << "Palavra chave";
 				break;
-			case Token::TIPO_OPERADOR:
+			case OperatorToken::TIPO_OPERADOR:
 				outFile << "Operador";
 			break;
-			case Token::TIPO_SYMBOL:
+			case SymbolToken::TIPO_SIMBOLO:
 				outFile << "Símbolo";
 			break;
 		}
