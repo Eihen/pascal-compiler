@@ -147,20 +147,18 @@ void AnalisadorLexico::analisar()
     
     //Teste - modificar arquivo
     exibirTabela();
-    gerarArquivo();
 }
 
 void AnalisadorLexico::exibirTabela()
 {
 	cout << endl;
-	cout.width(48);
+	cout.width(32);
 	cout.fill(' ');	
-	cout << "Tabela de tokens" << endl << endl;				//Título da tabela
-	cout << "Lexema" << "\t\t\t\t\t" << "Token" << endl;	//Colunas
+	cout << "Tabela de tokens" << endl;				//Título da tabela
+	cout << "Lexema" << "\t\t" << "Token" << endl;	//Colunas
 	for(Token token : tokens)
     {
-		cout.width(80);		//Separa linhas
-		cout << endl << cout.fill('-') << endl << token.getValue() << "\t\t\t\t\t";
+		cout << token.getValue() << "\t\t";
 		
 		switch(token.getTipo())
 		{
@@ -192,17 +190,13 @@ void AnalisadorLexico::exibirTabela()
 
 void AnalisadorLexico::gerarArquivo()
 {
-	ofstream outFile;	
+	ofstream outFile;
 	outFile.open("saida.txt");
-	outFile << endl;
-	outFile.width(48);
-	outFile.fill(' ');
-	outFile << "Tabela de tokens" << endl << endl;				//Título da tabela
-	outFile << "Lexema" << "\t\t\t\t\t" << "Token" << endl;		//Colunas
+	outFile << "Tabela de tokens" << endl;				//Título da tabela
+	outFile << "Lexema" << "\t\t" << "Token" << endl;		//Colunas
 	for(Token token : tokens)
 	{
-		outFile.width(80);			//Separa linhas
-		outFile << endl << outFile.fill('-') << endl << token.getValue() << "\t\t\t\t\t";
+		outFile << token.getValue() << "\t\t";
 		
 		switch(token.getTipo())
 		{
