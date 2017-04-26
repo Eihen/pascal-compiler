@@ -194,7 +194,7 @@ void AnalisadorLexico::exibirTabela()
 
 void AnalisadorLexico::gerarArquivo()
 {
-	ofstream outFile;
+	ofstream outFile;	
 	outFile.open("saida.txt");
 	outFile << endl; 
 	outFile.width(48); 
