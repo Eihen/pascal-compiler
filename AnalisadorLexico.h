@@ -18,6 +18,7 @@ public:
 private:
     ifstream file;
     list<Token> tokens;
+    int cont_ident;			//Conta os identificadores 
 
     void processaTokenNumerico(string palavra);
     void processaTokenSimbolo(string palavra);
