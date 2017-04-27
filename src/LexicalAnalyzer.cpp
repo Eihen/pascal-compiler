@@ -65,48 +65,47 @@ void LexicalAnalyzer::analyze()
 				{
 					flag = LIT_FLOAT;
 				}
-				else {
+				else { //erro
 					flag = ERR_FORMAT;
 				}
 				addToken(word, flag, lineNumber, i + 1);
             }
             //leitura de identificador/palavra reservada
-			else if (Helper::isLetter(c)) {
+			else if (Helper::isLetter(c)) { //começa com letra
                 word = c;
 				flag = 0;
                 for (i = i + 1; i < n; i++) {
                     c = line[i];
-                    if (Helper::isNumber(c) || Helper::isLetter(c))
+                    if (Helper::isNumber(c) || Helper::isLetter(c)) //composto por número, letra ou _
                         word += c;
-                    else if (Helper::isDelimiter(c)) {
+                    else if (Helper::isDelimiter(c)) { //delimitador encontrado, token finalizada
                         i--;
                         break;
                     }
-					else
+					else //caracter inválido
 					{
 						word += c;
 						flag = 1;
 					}
                 }
-				if (flag)
+				if (flag) //erro
 				{
 					addToken(word, ERR_FORMAT, lineNumber, i + 1);
 				}
 				else
 				{
-					addToken(word, Helper::isKeyword(word), lineNumber, i + 1);
+					addToken(word, Helper::isKeyword(word) /* Verifica se é keyword, caso contrário é identificador */, lineNumber, i + 1);
 				}
             }
 	
-            else if (c == '\'') {
-                //lê string
+            else if (c == '\'') { //Inicia com apostrofo, lê string
                 word = c;
 				flag = 0;
 
                 for (i = i + 1; i < n; i++) {
                     c = line[i];
 					
-                    if (c == '\'') {
+                    if (c == '\'') { //apostrofo pode ser finalizador ou precisa ser escapado
                         word += c;
 						
                         if (i + 1 < n) {
@@ -115,16 +114,16 @@ void LexicalAnalyzer::analyze()
                             if (c == '\'') {
                                 word += c;
                             }
-                            else if (Helper::isDelimiter(c)) {
+                            else if (Helper::isDelimiter(c)) { //delimitador encontrado, token finalizada
 								i--;
                                 break;
                             }
-							else
+							else //apostrofo não escapado, erro
 							{
 								flag = 1;
 							}
                         }
-						else
+						else //fim da linha sem finalizador, erro
 						{
 							flag = 1;
 						}
@@ -132,11 +131,11 @@ void LexicalAnalyzer::analyze()
                     else
                         word += c;
                 }
-				if (flag)
+				if (flag) //erro
 				{
 					addToken(word, ERR_FORMAT, lineNumber, i + 1);
 				}
-				else
+				else //string literal
 				{
 					addToken(word, LIT_STRING, lineNumber, i + 1);
 				}
@@ -156,38 +155,37 @@ void LexicalAnalyzer::analyze()
 						}
 					}
 					
-					if (i == (n - 1))
+					if (i == (n - 1)) //verifica se linha já foi finalizada e lê a próxima
 					{
 						if (getline(file, line)) {
 							i = 0;
 							n = line.length();
 						}
 						else {
-							addToken("/*", ERR_END_FILE, lineNumber, i + 1);
+							addToken("/*", ERR_END_FILE, lineNumber, i + 1); //Comentário não finalizado, fim inesperado de arquivo
 							break;
 						}
 					}
 				}
 			}
-            else if (!Helper::isSeparator(c)) {
+            else if (!Helper::isSeparator(c)) { //Se não for separador, verifica simbolo ou operador
 				word = c;
-				if ((i + 1) < n && Helper::isSymbolPrefix(c))
+				if ((i + 1) < n && Helper::isSymbolPrefix(c)) //verifica se pode ser simbolo ou operador com dois caracteres
 				{
 					word += line[i+1];
-					if ((flag = Helper::isSymbol(word)) == ERR_CHAR)
+					if ((flag = Helper::isSymbol(word)) == ERR_CHAR) //Verifica se o simbolo ou operador com dois caracteres é inválido
 					{
 						word = c;
-						flag = Helper::isSymbol(word);
+						flag = Helper::isSymbol(word); //Verifica o simbolo ou operador com só um caracter
 					}
 					else
 					{
-						i++;
+						i++; //Simbolo ou operador com dois caracteres é válido, então o próximo caracter já foi lido
 					}
-						
 				}
 				else
 				{
-					flag = Helper::isSymbol(word);
+					flag = Helper::isSymbol(word); //Não pode ser simbolo ou operador com dois caracteres, verifica apenas com um
 				}
 				addToken(word, flag, lineNumber, i + 1);
             }
