@@ -39,3 +39,9 @@
 *.workspace
 
 Makefile
+
+src/saida\.txt
+
+src/teste\.txt
+
+src/main

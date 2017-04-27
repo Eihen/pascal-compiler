@@ -160,7 +160,7 @@ void LexicalAnalyzer::analyze()
         }
     }
     
-    //Teste - modificar arquivo
+    //Imprime na tela e gera arquivo a partir da lista de tokens
     showTable();
     generateFile(); 
 }
@@ -188,18 +188,26 @@ void LexicalAnalyzer::showTable()
 			case LIT_STRING:
 				cout << "Cadeia de caracteres";
 			break;
-			case IDENTIFIER:
-				cout << "Identificador";
+			case ERR_CHAR:
+				cout << "Caracter inválido";
 			break;
-			case KW_BEGIN: //ToDo
-				cout << "Palavra chave";
+			case ERR_SIZE:
+				cout << "Identificador com muitos caracteres";
 			break;
-			case OP_PLUS: //ToDo
-				cout << "Operador";
+			case ERR_FORMAT:
+				cout << "Cadeia inválida";
 			break;
-			case SMB_SEMICOLON: //ToDo
-				cout << "Símbolo";
-			break;
+			default:
+				if(token.getType() <= OP_DIV_ASSIGN)
+					cout << "Operador " << token.getValue();
+				else if(token.getType() <= KW_XOR)
+					cout << "Palavra chave " << token.getValue();
+				else if(token.getType() <= TYPE_BOOLEAN)
+					cout << "Tipo " << token.getValue();
+				else if(token.getType() <= SMB_SEMICOLON)
+					cout << "Símbolo " << token.getValue();
+				else
+					cout << "Identificador " << token.getValue();
 		}
 		cout << endl;
 	}
@@ -231,18 +239,26 @@ void LexicalAnalyzer::generateFile()
 			case LIT_STRING:
 				outFile << "Cadeia de caracteres";
 			break;
-			case IDENTIFIER:
-				outFile << "Identificador";
+			case ERR_CHAR:
+				outFile << "Caracter inválido";
 			break;
-			case KW_BEGIN: //ToDo
-				outFile << "Palavra chave";
-				break;
-			case OP_PLUS: //ToDo
-				outFile << "Operador";
+			case ERR_SIZE:
+				outFile << "Identificador com muitos caracteres";
 			break;
-			case SMB_SEMICOLON: //ToDo
-				outFile << "Símbolo";
+			case ERR_FORMAT:
+				outFile << "Cadeia inválida";
 			break;
+			default:
+				if(token.getType() <= OP_DIV_ASSIGN)
+					outFile << "Operador " << token.getValue();
+				else if(token.getType() <= KW_XOR)
+					outFile << "Palavra chave " << token.getValue();
+				else if(token.getType() <= TYPE_BOOLEAN)
+					outFile << "Tipo " << token.getValue();
+				else if(token.getType() <= SMB_SEMICOLON)
+					outFile << "Símbolo " << token.getValue();
+				else
+					outFile << "Identificador " << token.getValue();
 		}
 		outFile << endl;
 	}
