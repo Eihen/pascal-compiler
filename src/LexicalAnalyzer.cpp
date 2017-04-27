@@ -138,7 +138,7 @@ void LexicalAnalyzer::analyze()
 				}
 				else
 				{
-					addToken(word, TYPE_STRING, lineNumber, i + 1);
+					addToken(word, LIT_STRING, lineNumber, i + 1);
 				}
             }
 			// Comentários
