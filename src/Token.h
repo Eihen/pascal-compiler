@@ -11,8 +11,8 @@ enum {
 		OP_PLUS /* + */, OP_MINUS /* - */, OP_MULT /* * */, OP_DIV /* / */, OP_MOD /* % */, OP_EQUALS /* = */, OP_DIFF /* <> */,
 		OP_HIGHER /* > */, OP_LOWER /* < */, OP_HIGHER_EQUALS /* >= */, OP_LOWER_EQUALS /* <= */, OP_COLON /* : */,
 		OP_BIN_AND /* & */, OP_BIN_OR /* | */, OP_BIN_NOT /* ! */, OP_BIN_COMPL /* ~ */, OP_SHIFT_LEFT /* << */, 
-		OP_SHIFT_RIGHT /* >> */, OP_ASSIGN /* := */, OP_PLUS_ASSIGN /* += */, OP_MINUS_ASSIGN /* -= */, OP_MULT_ASSING /* *= */,
-		OP_DIV_ASSIGN /* /= */,
+		OP_SHIFT_RIGHT /* >> */, OP_ASSIGN /* := */, OP_PLUS_ASSIGN /* += */, OP_MINUS_ASSIGN /* -= */, OP_MULT_ASSIGN /* *= */,
+		OP_DIV_ASSIGN /* /= */, 
 		
 		//Palavras Chave
 		KW_AND, KW_ARRAY, KW_ASM, KW_BEGIN, KW_BREAK, KW_CASE, KW_CONST, KW_CONSTRUCTOR, KW_CONTINUE, KW_DESTRUCTOR,
@@ -30,7 +30,7 @@ enum {
 		SMB_OPEN_PARENT_DOT /* (. */, SMB_CLOSE_PARENT_DOT /* .) */, SMB_SLASH_SLASH /* // */, SMB_SEMICOLON /* ; */,
 		
 		//Erros
-		ERR_CHAR, ERR_SIZE, ERR_FORMAT,
+		ERR_CHAR, ERR_SIZE, ERR_END_FILE, ERR_FORMAT,
 		
 		//Identificadores
 		IDENTIFIER
@@ -42,17 +42,16 @@ class Token
 {
 private:
     string value;
-    int type;
+    int type, line, column;
 protected:
     void setType(int _type);
 public:
-    Token(string _value) {
-        value = _value;
-    }
-	Token(string _value, int _type)
+	Token(string _value, int _type, int _line, int _column)
 	{
 		value = _value;
 		type = _type;
+		line = _line;
+		column = _column;
 	}
     string getValue();
     int getType();

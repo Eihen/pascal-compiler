@@ -1,6 +1,7 @@
 #include "Helper.h"
 #include "Token.h"
 #include <map>
+#include <algorithm> 
 
 using namespace std;
 
@@ -40,7 +41,7 @@ int Helper::isKeyword(string word) {
 		{"INTEGER", TYPE_INT}, {"REAL", TYPE_REAL}, {"BOOLEAN", TYPE_BOOLEAN}, {"CHARACTER", TYPE_CHAR}, {"BYTE", TYPE_BYTE}, {"STRING", TYPE_STRING} 
 	};
 	map<string,int>::iterator it;
-	if ((it = keywords.find(word)) != keywords.end())
+	if ((it = keywords.find(toUpper(word))) != keywords.end())
 	{
 		return it->second;
 	}
@@ -63,7 +64,7 @@ int Helper::isSymbol(string word) {
 		{"+", OP_PLUS}, {"-", OP_MINUS}, {"*", OP_MULT}, {"/", OP_DIV}, {"%", OP_MOD}, {"=", OP_EQUALS}, {"<>", OP_DIFF}, 
 		{">", OP_HIGHER}, {"<", OP_LOWER}, {">=", OP_HIGHER_EQUALS}, {"<=", OP_LOWER_EQUALS}, {":", OP_COLON}, 
 		{"&", OP_BIN_AND}, {"|", OP_BIN_OR}, {"!", OP_BIN_NOT}, {"~", OP_BIN_COMPL}, {"<<", OP_SHIFT_LEFT}, 
-		{">>", OP_SHIFT_RIGHT}, {":=", OP_ASSIGN}, {"+=", OP_PLUS_ASSIGN}, {"-=", OP_MINUS_ASSIGN}, {"*=", OP_MULT_ASSING}, 
+		{">>", OP_SHIFT_RIGHT}, {":=", OP_ASSIGN}, {"+=", OP_PLUS_ASSIGN}, {"-=", OP_MINUS_ASSIGN}, {"*=", OP_MULT_ASSIGN}, 
 		{"/=", OP_DIV_ASSIGN}
 	};
 	map<string,int>::iterator it;
@@ -75,5 +76,11 @@ int Helper::isSymbol(string word) {
 	{
 		return ERR_CHAR;
 	}
+}
+
+string Helper::toUpper(string word)
+{
+	transform(word.begin(), word.end(), word.begin(), ::toupper);
+	return word;
 }
 

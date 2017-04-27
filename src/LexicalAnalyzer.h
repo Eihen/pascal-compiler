@@ -20,7 +20,7 @@ private:
     list<Token> tokens;
     int cont_ident;			//Conta os identificadores 
 
-	void addToken(string word, int type);
+	void addToken(string word, int type, int line, int column);
     void showTable();
     void generateFile();
 };

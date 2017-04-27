@@ -11,9 +11,9 @@ LexicalAnalyzer::LexicalAnalyzer(const char* fileName)
 	cont_ident = 0;
 }
 
-void LexicalAnalyzer::addToken(string value, int type)
+void LexicalAnalyzer::addToken(string value, int type, int line, int column)
 {
-	Token token(value, type);
+	Token token(value, type, line, column);
 	tokens.push_back(token);
 }
 
@@ -21,8 +21,10 @@ void LexicalAnalyzer::analyze()
 {
 	string line, word;
     char c, flag;
+	int lineNumber = 0;
     while (getline(file, line)) {
 		line += '\n';
+		lineNumber++;
         for (int i = 0, n = line.length(); i < n; i++) {
             c = line[i];
             
@@ -66,7 +68,7 @@ void LexicalAnalyzer::analyze()
 				else {
 					flag = ERR_FORMAT;
 				}
-				addToken(word, flag);
+				addToken(word, flag, lineNumber, i + 1);
             }
             //leitura de identificador/palavra reservada
 			else if (Helper::isLetter(c)) {
@@ -88,11 +90,11 @@ void LexicalAnalyzer::analyze()
                 }
 				if (flag)
 				{
-					addToken(word, ERR_FORMAT);
+					addToken(word, ERR_FORMAT, lineNumber, i + 1);
 				}
 				else
 				{
-					addToken(word, Helper::isKeyword(word));
+					addToken(word, Helper::isKeyword(word), lineNumber, i + 1);
 				}
             }
 	
@@ -132,30 +134,62 @@ void LexicalAnalyzer::analyze()
                 }
 				if (flag)
 				{
-					addToken(word, ERR_FORMAT);
+					addToken(word, ERR_FORMAT, lineNumber, i + 1);
 				}
 				else
 				{
-					addToken(word, TYPE_STRING);
+					addToken(word, TYPE_STRING, lineNumber, i + 1);
 				}
             }
-            else {
+			// Comentários
+			else if (c == '/' && (i + 1 < n && (line[i + 1] == '/' || line [i + 1] == '*'))) {
+				if (line[i + 1] == '/')
+					break; //ignora toda a linha
+				// /*
+				for (i = i + 2; i < n; i++) {
+					//finalizador do comentário
+					if (line[i] == '*') {
+						int next = i + 1;
+						if (next < n && line[next] == '/') {
+							i = next;
+							break;
+						}
+					}
+					
+					if (i == (n - 1))
+					{
+						if (getline(file, line)) {
+							i = 0;
+							n = line.length();
+						}
+						else {
+							addToken("/*", ERR_END_FILE, lineNumber, i + 1);
+							break;
+						}
+					}
+				}
+			}
+            else if (!Helper::isSeparator(c)) {
 				word = c;
 				if ((i + 1) < n && Helper::isSymbolPrefix(c))
 				{
 					word += line[i+1];
 					if ((flag = Helper::isSymbol(word)) == ERR_CHAR)
 					{
-						i++;
-					}
-					else
-					{
 						word = c;
 						flag = Helper::isSymbol(word);
 					}
+					else
+					{
+						i++;
+					}
 						
 				}
-				addToken(word, flag);
+				else
+				{
+					flag = Helper::isSymbol(word);
+				}
+				addToken(word, flag, lineNumber, i + 1);
             }
         }
     }
@@ -196,6 +230,9 @@ void LexicalAnalyzer::showTable()
 			break;
 			case ERR_FORMAT:
 				cout << "Cadeia inválida";
+			break;
+			case ERR_END_FILE:
+				cout << "Fim inesperado de arquivo";
 			break;
 			default:
 				if(token.getType() <= OP_DIV_ASSIGN)

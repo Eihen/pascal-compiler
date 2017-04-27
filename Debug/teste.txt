@@ -7,9 +7,16 @@ end;
 begin
   a : Integer;
   b := 15;
-  a := 1.5;
+  1a := 1.5;
+  /*
+	comentarios
+	xyz
+	123
+  */
   c := 'asygasyg''aygsyasg';
   d := 'asdiuadhsiu'hsaduaish';
-  e := asduhasud';
+  e := asduhasud'; //aosadkadajdidskdksds345ertkdodasasdksasoakd0ajdioadiad//a/f/ewrw/rwer
+  /* comentario nao finalizado
   f := 'asduhausdha;
+  
 end.

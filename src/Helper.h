@@ -17,6 +17,7 @@ public:
 	static int isKeyword(string word);
 	static bool isSymbolPrefix(char c);
 	static int isSymbol(string word);
+	static string toUpper(string word);
 };
 
 #endif // HELPER_H
