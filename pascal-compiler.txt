@@ -1,1 +1,0 @@
-./Debug/AnalisadorLexico.cpp.o ./Debug/main.cpp.o ./Debug/Util.cpp.o ./Debug/src_Token_StringToken.cpp.o ./Debug/src_Token_NumberToken.cpp.o ./Debug/src_Token_Token.cpp.o ./Debug/src_Token_OperatorToken.cpp.o ./Debug/src_Token_SymbolToken.cpp.o   

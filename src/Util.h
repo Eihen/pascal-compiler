@@ -5,11 +5,11 @@
 
 using namespace std;
 
-class Util
+class Helper
 {
 public:
-    Util();
-    ~Util();
+    Helper();
+    ~Helper();
     static bool isSeparator(char c);
     static bool isDelimiter(char c);
 

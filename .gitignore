@@ -33,3 +33,9 @@
 # IDE
 *.project
 *.mk
+
+\.codelite/
+
+*.workspace
+
+Makefile
