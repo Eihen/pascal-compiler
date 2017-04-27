@@ -204,12 +204,12 @@ void LexicalAnalyzer::showTable()
 	cout << endl;
 	cout.width(48);
 	cout.fill(' ');	
-	cout << "Tabela de tokens" << endl << endl;        //Título da tabela 
-    cout << "Lexema" << "\t\t\t\t\t" << "Token" << endl;  //Colunas 
+	cout << "Tabela de tokens" << endl << endl;        			  								//Título da tabela 
+    cout << "Lexema" << "\t\t\t" << "Token" << "\t\t" << "Linha" << "\t" << "Coluna" << endl;  //Colunas 
 	for(Token token : tokens)
     {
 		cout.width(80);    //Separa linhas 
-		cout << endl << cout.fill('-') << endl << token.getValue() << "\t\t\t\t\t";
+		cout << endl << cout.fill('-') << endl << token.getValue() << "\t\t\t";
 		
 		switch(token.getType())
 		{
@@ -246,6 +246,7 @@ void LexicalAnalyzer::showTable()
 				else
 					cout << "Identificador " << token.getValue();
 		}
+		cout << "\t\t" << token.getLine() << "\t" << token.getColumn(); 
 		cout << endl;
 	}
 }
@@ -257,13 +258,13 @@ void LexicalAnalyzer::generateFile()
 	outFile << endl; 
 	outFile.width(48); 
 	outFile.fill(' '); 
-	outFile << "Tabela de tokens" << endl << endl;        //Título da tabela 
-	outFile << "Lexema" << "\t\t\t\t\t" << "Token" << endl;    //Colunas 
+	outFile << "Tabela de tokens" << endl << endl;        										  //Título da tabela 
+	outFile << "Lexema" << "\t\t\t" << "Token" << "\t\t" << "Linha" << "\t" << "Coluna" << endl;  //Colunas 
 
 	for(Token token : tokens)
 	{
 		outFile.width(80);      //Separa linhas 
-		outFile << endl << outFile.fill('-') << endl << token.getValue() << "\t\t\t\t\t"; 
+		outFile << endl << outFile.fill('-') << endl << token.getValue() << "\t\t\t"; 
 		
 		switch(token.getType())
 		{
@@ -297,6 +298,7 @@ void LexicalAnalyzer::generateFile()
 				else
 					outFile << "Identificador " << token.getValue();
 		}
+		outFile << "\t\t" << token.getLine() << "\t" << token.getColumn();
 		outFile << endl;
 	}
 	outFile.close();

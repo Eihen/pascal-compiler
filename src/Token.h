@@ -55,6 +55,8 @@ public:
 	}
     string getValue();
     int getType();
+    int getLine();
+    int getColumn();
 };
 
 #endif // BASETOKEN_H
