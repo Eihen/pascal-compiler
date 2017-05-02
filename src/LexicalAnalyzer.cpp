@@ -199,53 +199,93 @@ void LexicalAnalyzer::analyze()
 
 void LexicalAnalyzer::showTable()
 {
-	cout << endl;
-	cout.width(48);
-	cout.fill(' ');	
-	cout << "Tabela de tokens" << endl << endl;        			  								//Título da tabela 
-    cout << "Lexema" << "\t\t\t" << "Token" << "\t\t" << "Linha" << "\t" << "Coluna" << endl;  //Colunas 
+	//Título------------------------------------------------------------
+	cout.fill(' ');	  cout.width(32);	cout << ' ';
+	cout << "Tabela de tokens" << endl << endl;        			  								 
+	//------------------------------------------------------------------
+	//Colunas-----------------------------------------------------------
+    cout << "Lexema";
+    cout.fill(' ');    cout.width(32);  cout << "| ";					//Espaço entre "Lexema e Token"
+    cout << "Token";
+    cout.fill(' ');	   cout.width(23);	cout << "| ";  					//Espaço entre "Token" e "Linha"
+    cout << "Linha" << " | " << "Coluna" << endl;
+    //------------------------------------------------------------------  							
 	for(Token token : tokens)
-    {
-		cout.width(80);    //Separa linhas 
-		cout << endl << cout.fill('-') << endl << token.getValue() << "\t\t\t";
+    { 
+		cout.fill('-');		cout.width(80);		cout << '-';								//Separa linhas  								  
+		cout << endl << token.getValue();													//Lexema
+		cout.fill(' ');     cout.width(38 - token.getValue().length());		cout << "| ";	//Tabulação
 		
 		switch(token.getType())
 		{
 			case LIT_FLOAT:
 				cout << "Número com ponto flutuante";
+				cout.width(2);
 			break;
 			case LIT_INT:
 				cout << "Número inteiro";
+				cout.width(14);
 			break;
 			case LIT_STRING:
 				cout << "Cadeia de caracteres";
+				cout.width(8);
 			break;
 			case ERR_CHAR:
 				cout << "Caracter inválido";
+				cout.width(11);
 			break;
 			case ERR_SIZE:
-				cout << "Identificador com muitos caracteres";
+				cout << "Ident. com muitos carac.";
+				cout.width(4);
 			break;
 			case ERR_FORMAT:
 				cout << "Cadeia inválida";
+				cout.width(13);
 			break;
 			case ERR_END_FILE:
 				cout << "Fim inesperado de arquivo";
+				cout.width(3);
 			break;
 			default:
 				if(token.getType() <= OP_DIV_ASSIGN)
+				{
 					cout << "Operador " << token.getValue();
+					cout.width(19 - token.getValue().length());
+				}
 				else if(token.getType() <= KW_XOR)
+				{
 					cout << "Palavra chave " << token.getValue();
+					cout.width(14 - token.getValue().length());
+				}
 				else if(token.getType() <= TYPE_BOOLEAN)
+				{
 					cout << "Tipo " << token.getValue();
+					cout.width(23 - token.getValue().length());
+				}
 				else if(token.getType() <= SMB_SEMICOLON)
+				{
 					cout << "Símbolo " << token.getValue();
+					cout.width(20 - token.getValue().length());
+				}
 				else
+				{
 					cout << "Identificador " << token.getValue();
+					cout.width(14 - token.getValue().length());
+				}
 		}
-		cout << "\t\t" << token.getLine() << "\t" << token.getColumn(); 
-		cout << endl;
+		cout << "| ";													//Tabulação
+		cout << token.getLine();
+		cout.width(8 - to_string(token.getLine()).length());
+		cout << "| ";													//Tabulação
+		cout << token.getColumn() << endl;
+		//Linha vertical da tabela
+		cout.width(38);
+		cout << "| ";
+		cout.width(28);
+		cout << "| ";
+		cout.width(8);
+		cout << "| " << endl;
+		//-------------------------
 	}
 }
 
@@ -253,51 +293,93 @@ void LexicalAnalyzer::generateFile()
 {
 	ofstream outFile;	
 	outFile.open("saida.txt");
-	outFile << endl; 
-	outFile.width(48); 
-	outFile.fill(' '); 
-	outFile << "Tabela de tokens" << endl << endl;        										  //Título da tabela 
-	outFile << "Lexema" << "\t\t\t" << "Token" << "\t\t" << "Linha" << "\t" << "Coluna" << endl;  //Colunas 
-
+	//Título------------------------------------------------------------
+	outFile.fill(' ');	  outFile.width(32);	outFile << ' ';
+	outFile << "Tabela de tokens" << endl << endl;        			  								 
+	//------------------------------------------------------------------
+	//Colunas-----------------------------------------------------------
+    outFile << "Lexema";
+    outFile.fill(' ');    outFile.width(32);  outFile << "| ";			//Espaço entre "Lexema e Token"
+    outFile << "Token";
+    outFile.fill(' ');	  outFile.width(23);  outFile << "| ";  		//Espaço entre "Token" e "Linha"
+    outFile << "Linha" << " | " << "Coluna" << endl;
+    //------------------------------------------------------------------  							
 	for(Token token : tokens)
-	{
-		outFile.width(80);      //Separa linhas 
-		outFile << endl << outFile.fill('-') << endl << token.getValue() << "\t\t\t"; 
+    { 
+		outFile.fill('-'); outFile.width(80);	 outFile << '-';		//Separa linhas  								  
+		outFile << endl << token.getValue();													//Lexema
+		outFile.fill(' '); outFile.width(38 - token.getValue().length());	outFile << "| ";	//Tabulação
 		
 		switch(token.getType())
 		{
 			case LIT_FLOAT:
 				outFile << "Número com ponto flutuante";
+				outFile.width(2);
 			break;
 			case LIT_INT:
 				outFile << "Número inteiro";
+				outFile.width(14);
 			break;
 			case LIT_STRING:
 				outFile << "Cadeia de caracteres";
+				outFile.width(8);
 			break;
 			case ERR_CHAR:
 				outFile << "Caracter inválido";
+				outFile.width(11);
 			break;
 			case ERR_SIZE:
-				outFile << "Identificador com muitos caracteres";
+				outFile << "Ident. com muitos carac.";
+				outFile.width(4);
 			break;
 			case ERR_FORMAT:
 				outFile << "Cadeia inválida";
+				outFile.width(13);
+			break;
+			case ERR_END_FILE:
+				outFile << "Fim inesperado de arquivo";
+				outFile.width(3);
 			break;
 			default:
 				if(token.getType() <= OP_DIV_ASSIGN)
+				{
 					outFile << "Operador " << token.getValue();
+					outFile.width(19 - token.getValue().length());
+				}
 				else if(token.getType() <= KW_XOR)
+				{
 					outFile << "Palavra chave " << token.getValue();
+					outFile.width(14 - token.getValue().length());
+				}
 				else if(token.getType() <= TYPE_BOOLEAN)
+				{
 					outFile << "Tipo " << token.getValue();
+					outFile.width(23 - token.getValue().length());
+				}
 				else if(token.getType() <= SMB_SEMICOLON)
+				{
 					outFile << "Símbolo " << token.getValue();
+					outFile.width(20 - token.getValue().length());
+				}
 				else
+				{
 					outFile << "Identificador " << token.getValue();
+					outFile.width(14 - token.getValue().length());
+				}
 		}
-		outFile << "\t\t" << token.getLine() << "\t" << token.getColumn();
-		outFile << endl;
+		outFile << "| ";												//Tabulação
+		outFile << token.getLine();
+		outFile.width(8 - to_string(token.getLine()).length());
+		outFile << "| ";												//Tabulação
+		outFile << token.getColumn() << endl;
+		//Linha vertical da tabela
+		outFile.width(38);
+		outFile << "| ";
+		outFile.width(28);
+		outFile << "| ";
+		outFile.width(8);
+		outFile << "| " << endl;
+		//-------------------------
 	}
 	outFile.close();
 }
