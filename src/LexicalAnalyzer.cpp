@@ -8,7 +8,7 @@ using namespace std;
 LexicalAnalyzer::LexicalAnalyzer(const char* fileName)
 {
 	file.open(fileName);
-	cont_ident = 0;
+	cont_ident = IDENTIFIER;
 }
 
 void LexicalAnalyzer::addToken(string value, int type, int line, int column)
@@ -94,10 +94,23 @@ void LexicalAnalyzer::analyze()
 				}
 				else
 				{
-					addToken(word, Helper::isKeyword(word) /* Verifica se é keyword, caso contrário é identificador */, lineNumber, i + 1);
+					int type = Helper::isKeyword(word); // Verifica se é keyword, caso contrário é identificador
+					if (type == IDENTIFIER)
+					{
+						map<string,int>::iterator it = identifiers.find(Helper::toUpper(word));
+						if (it == identifiers.end())
+						{
+							type = cont_ident++;
+							identifiers.insert(pair<string, int>(word, type));
+						}
+						else
+						{
+							type = it->second;
+						}
+					}
+					addToken(word, type, lineNumber, i + 1);
 				}
             }
-	
             else if (c == '\'') { //Inicia com apostrofo, lê string
                 word = c;
 				flag = 0;
