@@ -13,7 +13,7 @@ LexicalAnalyzer::LexicalAnalyzer(const char* fileName)
 
 void LexicalAnalyzer::addToken(string value, int type, int line, int column)
 {
-	Token token(value, type, line, column);
+	Token token(value, type, line, column - value.length());			//Subtrai o tamanho da palavra para indicar a coluna da primeira letra
 	tokens.push_back(token);
 }
 
@@ -97,7 +97,8 @@ void LexicalAnalyzer::analyze()
 					int type = Helper::isKeyword(word); // Verifica se é keyword, caso contrário é identificador
 					if (type == IDENTIFIER)
 					{
-						map<string,int>::iterator it = identifiers.find(Helper::toUpper(word));
+						word = Helper::toUpper(word);
+						map<string,int>::iterator it = identifiers.find(word);
 						if (it == identifiers.end())
 						{
 							type = cont_ident++;
@@ -282,8 +283,8 @@ void LexicalAnalyzer::showTable()
 				}
 				else
 				{
-					cout << "Identificador " << token.getValue();
-					cout.width(14 - token.getValue().length());
+					cout << "Identificador " << token.getType() - IDENTIFIER + 1;			//Subtrai o valor base para determinar o número do identificador
+					cout.width(14 - to_string(token.getType() - IDENTIFIER + 1).length());  //Subtrai o valor base para determinar o número do identificador
 				}
 		}
 		cout << "| ";													//Tabulação
@@ -376,8 +377,8 @@ void LexicalAnalyzer::generateFile()
 				}
 				else
 				{
-					outFile << "Identificador " << token.getValue();
-					outFile.width(14 - token.getValue().length());
+					outFile << "Identificador " << token.getType() - IDENTIFIER + 1;			//Subtrai o valor base para determinar o número do identificador
+					outFile.width(14 - to_string(token.getType() - IDENTIFIER + 1).length());  //Subtrai o valor base para determinar o número do identificador
 				}
 		}
 		outFile << "| ";												//Tabulação
