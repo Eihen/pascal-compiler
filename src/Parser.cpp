@@ -96,7 +96,64 @@ void Parser::statm()
 
 void Parser::read_type() 
 {
-    
+    if (!token->isType()) {
+        if (type == KW_PACKED)
+            getToken();
+        //ARRAY
+        if (type == KW_ARRAY) {
+            getToken();
+            if (type == SMB_OPEN_BRACKET) {
+                do {
+                    getToken();
+                    sitype();
+                    getToken();
+                } while (type == SMB_COMMA);
+                
+                if (type == SMB_CLOSE_BRACKET) {
+                    getToken();
+                    if (type == KW_OF) {
+                        getToken();
+                        read_type();
+                    }
+                    else
+                        trataErro("of esperado");
+                }
+                else
+                    trataErro("] esperado");
+                
+            }
+            else
+                trataErro("[ esperado");
+        }
+        //FILE
+        else if (type == KW_FILE) {
+            getToken();
+            if (type == KW_OF) {
+                read_type();
+            }
+            else
+                trataErro("of esperado");
+        }
+        //SET
+        else if (type == KW_SET) {
+            getToken();
+            if (type == KW_OF) {
+                sitype();
+            }
+            else
+                trataErro("of esperado");
+        }
+        //RECORD
+        else if (type == KW_RECORD) {
+            getToken();
+            filist();
+            getToken();
+            if (type != KW_END) 
+                trataErro("end esperado");
+        }
+        else
+            sitype();
+    }
 }
 
 void Parser::block()
