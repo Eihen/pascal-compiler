@@ -1,7 +1,4 @@
 #include "LexicalAnalyzer.h"
-#include "Helper.h"
-#include "Token.h"
-#include <stdio.h>
 
 using namespace std;
 
@@ -11,9 +8,21 @@ LexicalAnalyzer::LexicalAnalyzer(const char* fileName)
 	cont_ident = IDENTIFIER;
 }
 
+LexicalAnalyzer::LexicalAnalyzer(const char* fileName, TokenQueue* _tokenQueue)
+{
+	file.open(fileName);
+	cont_ident = IDENTIFIER;
+	tokenQueue = _tokenQueue;
+}
+
 void LexicalAnalyzer::addToken(string value, int type, int line, int column)
 {
 	Token token(value, type, line, column - value.length());			//Subtrai o tamanho da palavra para indicar a coluna da primeira letra
+	
+	if (tokenQueue != NULL)
+	{
+		(*tokenQueue).enqueue(token);
+	}
 	tokens.push_back(token);
 }
 
@@ -205,7 +214,13 @@ void LexicalAnalyzer::analyze()
             }
         }
     }
-    
+	
+	//Sinaliza que não há mais tokens a serem adicionadas
+	if (tokenQueue != NULL)
+	{
+		(*tokenQueue).finish();
+	}
+	
     //Imprime na tela e gera arquivo a partir da lista de tokens
     showTable();
     generateFile(); 

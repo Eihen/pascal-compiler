@@ -3,7 +3,9 @@
 
 #include <string>
 
-enum { 
+namespace std
+{
+	enum { 
 		//Literais
 		LIT_INT, LIT_FLOAT, LIT_STRING,
 		
@@ -36,29 +38,27 @@ enum {
 		IDENTIFIER
 	 };
 
-using namespace std;
-
-class Token
-{
-private:
-    string value;
-    int type, line, column;
-protected:
-    void setType(int _type);
-public:
-	Token(string _value, int _type, int _line, int _column)
+	class Token
 	{
-		value = _value;
-		type = _type;
-		line = _line;
-		column = _column;
-	}
-    string getValue();
-    int getType();
-    int getLine();
-    int getColumn();
-    bool isIdentifier();
-    bool isType();
-};
-
+		private:
+			string value;
+			int type, line, column;
+		protected:
+			void setType(int _type);
+		public:
+			Token(string _value, int _type, int _line, int _column)
+			{
+				value = _value;
+				type = _type;
+				line = _line;
+				column = _column;
+			}
+			string getValue();
+			int getType();
+			int getLine();
+			int getColumn();
+			bool isIdentifier();
+			bool isType();
+	};
+}
 #endif // BASETOKEN_H

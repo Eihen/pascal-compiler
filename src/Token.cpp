@@ -1,5 +1,7 @@
 #include "Token.h"
 
+using namespace std;
+
 string Token::getValue()
 {
     return value;
