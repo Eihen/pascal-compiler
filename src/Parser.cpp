@@ -1,16 +1,18 @@
-#include "Token.h"
 #include "Parser.h"
 
-Parser::Parser()
+using namespace std;
+
+Parser::Parser(TokenQueue* _tokenQueue)
 {
+	tokenQueue = _tokenQueue;
 	getToken();
 	progrm();
 }	
 
 void Parser::getToken()
 {
-	//TODO
-	//Armazar o token na variável token e o tipo do Token na variável "type"
+	token = tokenQueue->dequeue();
+	type = token->getType();
 }
 
 void Parser::constant()

@@ -61,4 +61,5 @@ namespace std
 			bool isType();
 	};
 }
+
 #endif // BASETOKEN_H

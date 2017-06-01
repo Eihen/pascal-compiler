@@ -21,7 +21,7 @@ void TokenQueue::finish()
 	not_empty.notify_one();
 }
 
-void TokenQueue::enqueue(Token token)
+void TokenQueue::enqueue(Token* token)
 {
 	//Trava para que os métodos não sejam executados ao mesmo tempo
 	std::unique_lock<std::mutex> l(lock);
@@ -33,7 +33,7 @@ void TokenQueue::enqueue(Token token)
 	not_empty.notify_one();
 }
 
-Token TokenQueue::dequeue()
+Token* TokenQueue::dequeue()
 {
 	//Trava para enqueue e dequeue não serem acessados ao mesmo tempo
 	std::unique_lock<std::mutex> l(lock);
@@ -42,7 +42,7 @@ Token TokenQueue::dequeue()
 	not_empty.wait(l, [this](){return !tokenQueue.empty() || finished;});
 	
 	//Retira token da lista
-    Token token = tokenQueue.front();
+    Token* token = tokenQueue.front();
 	tokenQueue.pop();
 	
 	return token;

@@ -32,4 +32,5 @@ namespace std
 			void generateFile();
 	};
 }
+
 #endif // LEXICALANALISER_H

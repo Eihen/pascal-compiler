@@ -1,10 +1,10 @@
 #include <cstdio>
 #include <iostream>
 #include <string>
-#include "LexicalAnalyzer.h"
-#include "TokenQueue.h"
-#include "Token.h"
 #include <thread>
+#include "LexicalAnalyzer.h"
+#include "Parser.h"
+#include "TokenQueue.h"
 
 using namespace std;
 
@@ -18,7 +18,7 @@ void lexicalCallFromThread(const char* fileName)
 
 void parserCallFromThread()
 {
-	
+	Parser parser(&tokenQueue);
 }
 
 int main() {
