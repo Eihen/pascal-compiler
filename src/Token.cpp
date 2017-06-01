@@ -25,3 +25,13 @@ void Token::setType(int _type)
     type = _type;
 }
 
+bool Token::isIdentifier()
+{
+    return type >= IDENTIFIER;
+}
+
+bool Token::isType()
+{
+    return type >= TYPE_INT && type <= TYPE_BOOLEAN;
+}
+

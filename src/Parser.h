@@ -7,7 +7,8 @@ public:
 	~Parser();
 	
 private:
-	int simbolo;
+    Token* token;
+	int type;
 
 	void getToken();
 	void constant();
@@ -18,6 +19,8 @@ private:
 	void expr();
 	void palist();
 	void statm();
+    void read_type();
+    void block();
 	void progrm();
-	void trataErro();
+	void trataErro(string message);
 };

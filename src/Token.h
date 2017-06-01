@@ -57,6 +57,8 @@ public:
     int getType();
     int getLine();
     int getColumn();
+    bool isIdentifier();
+    bool isType();
 };
 
 #endif // BASETOKEN_H
