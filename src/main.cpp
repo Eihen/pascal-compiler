@@ -25,10 +25,10 @@ int main() {
 	string fileName = "teste.txt";
 	
 	//TODO
-	//std::cout << "Digite o caminho do arquivo a ser analisado: " << std::endl;
+	//cout << "Digite o caminho do arquivo a ser analisado: " << endl;
 	//cin >> nomeArquivo;
-	std::thread lexicalThread(lexicalCallFromThread, fileName.c_str());
-	std::thread parserThread(parserCallFromThread);
+	thread lexicalThread(lexicalCallFromThread, fileName.c_str());
+	thread parserThread(parserCallFromThread);
 	
 	lexicalThread.join();
 	parserThread.join();
