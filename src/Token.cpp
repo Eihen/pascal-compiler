@@ -37,3 +37,7 @@ bool Token::isType()
     return type >= TYPE_INT && type <= TYPE_BOOLEAN;
 }
 
+bool Token::isNumber()
+{
+    return type == LIT_INT || type == LIT_FLOAT;
+}

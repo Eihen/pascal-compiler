@@ -94,6 +94,181 @@ void Parser::palist()
 
 void Parser::statm()
 {
+    //number
+    if (token->isNumber()) {
+        getToken();
+        if (type != SMB_COLON)
+            trataErro(": esperado");
+    }
+    //TODO identifier
+    else if (token->isIdentifier()) {
+    }
+    //begin
+    else if (type == KW_BEGIN) {
+        do {
+            getToken();
+            statm();
+            getToken();
+        } while (type == SMB_SEMICOLON);
+        
+        if (type != KW_END)
+            trataErro("end esperado");
+    }
+    //if
+    else if (type == KW_IF) {
+        getToken();
+        expr();
+        getToken();
+        if (type == KW_THEN) {
+            getToken();
+            statm();
+            getToken();
+            if (type == KW_ELSE) {
+                getToken();
+                statm();
+            }
+            //TODO lambda (sem getToken())
+        }
+        else 
+            trataErro("then esperado");
+    }
+    //case
+    else if (type == KW_CASE) {
+        getToken();
+        expr();
+        getToken();
+        if (type == KW_OF) {
+            do {
+                getToken();
+                if (type == LIT_STRING || token->isIdentifier() /* constant identifier */ || token->isNumber())
+                    getToken();
+                else if (type == OP_PLUS || type == OP_MINUS) {
+                    getToken();
+                    if (token->isIdentifier() /* constant identifier */ || token->isNumber()) 
+                        getToken();
+                    else {
+                        trataErro("constante esperada");
+                        break;
+                    }
+                }
+                else {
+                    trataErro("string, constante, +, - ou número esperado");
+                    break;
+                }
+                
+                //, or :
+                if (type == SMB_COMMA)
+                    continue;
+                    
+                if (type == SMB_COLON) {
+                    getToken();
+                    statm();
+                    getToken();
+                    //; ou end esperado nesse ponto
+                }
+                else {
+                    trataErro(", ou : esperado");
+                    break;
+                }
+                
+            } while (type == SMB_SEMICOLON);
+            
+            if (type != KW_END)
+                trataErro("end esperado");
+        }
+        else
+            trataErro("of esperado");
+    }
+    //while
+    else if (type == KW_WHILE) {
+        getToken();
+        expr();
+        getToken();
+        if (type == KW_DO) {
+            getToken();
+            statm();
+        }
+        else
+            trataErro("do esperado");
+    }
+    //repeat
+    else if (type == KW_REPEAT) {
+        do {
+            getToken();
+            statm();
+            getToken();
+        } while (type == SMB_SEMICOLON);
+        
+        //until
+        if (type == KW_UNTIL) {
+            getToken();
+            expr();
+        }
+        else
+            trataErro("until esperado");
+    }
+    //for
+    else if (type == KW_FOR) {
+        getToken();
+        if (token->isIdentifier()) { //variable identifier
+            getToken();
+            infipo();   
+            getToken();
+            if (type == OP_ASSIGN) {
+                getToken();
+                expr();
+                getToken();
+                if (type == KW_TO || type == KW_DOWNTO) {
+                    getToken();
+                    expr();
+                    getToken();
+                    if (type == KW_DO) {
+                        getToken();
+                        statm();
+                    }
+                    else
+                        trataErro("do esperado");
+                }
+                else
+                    trataErro("to ou downto eesperado");
+            }
+            else
+                trataErro(":= esperado");
+            
+        }
+        else
+            trataErro("Variável esperada");
+    }
+    //with
+    else if (type == KW_WITH) {
+        do {
+            getToken();
+            if (token->isIdentifier()) { //variable identifier
+                getToken();
+                infipo();
+                getToken();
+                //se este token for uma vírgula, continuará o for
+            }
+            else {
+                trataErro("Variável esperada");
+                break;
+            }
+        } while (type == SMB_COMMA);
+        
+        //"do" esperado após leitura das variáveis
+        if (type == KW_DO) {
+            getToken();
+            statm();
+        }
+        else
+            trataErro("do esperado");
+    }
+    //goto
+    else if (type == KW_GOTO) {
+        getToken();
+        if (type != LIT_INT)
+            trataErro("Número inteiro esperado");
+    }
 }
 
 void Parser::read_type() 

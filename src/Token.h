@@ -59,6 +59,7 @@ namespace std
 			int getColumn();
 			bool isIdentifier();
 			bool isType();
+            bool isNumber();
 	};
 }
 
