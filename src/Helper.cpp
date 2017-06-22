@@ -56,7 +56,7 @@ int Helper::isSymbol(string word) {
     static map<string, int> symbols = {
 		{"[", SMB_OPEN_BRACKET}, {"]", SMB_CLOSE_BRACKET}, {"(", SMB_OPEN_PARENT}, {")", SMB_CLOSE_PARENT}, {".", SMB_DOT}, {",", SMB_COMMA}, {":", SMB_COLON}, {"^", SMB_CARET},
 		{"@", SMB_AT}, {"{", SMB_OPEN_BRACE}, {"}", SMB_CLOSE_BRACE}, {"$", SMB_DOLLAR}, {"#", SMB_NUM_SIGN}, {"(*", SMB_OPEN_PARENT_ASTERISK}, {"*)", SMB_CLOSE_PARENT_ASTERISK},
-		{"(.", SMB_OPEN_PARENT_DOT}, {".)", SMB_CLOSE_PARENT_DOT}, {"//", SMB_SLASH_SLASH}, {";", SMB_SEMICOLON},
+		{"(.", SMB_OPEN_PARENT_DOT}, {".)", SMB_CLOSE_PARENT_DOT}, {"//", SMB_SLASH_SLASH}, {"..", SMB_DOUBLE_DOT}, {";", SMB_SEMICOLON},
 		
 		{"+", OP_PLUS}, {"-", OP_MINUS}, {"*", OP_MULT}, {"/", OP_DIV}, {"%", OP_MOD}, {"=", OP_EQUALS}, {"<>", OP_DIFF}, 
 		{">", OP_HIGHER}, {"<", OP_LOWER}, {">=", OP_HIGHER_EQUALS}, {"<=", OP_LOWER_EQUALS}, {":", OP_COLON}, 

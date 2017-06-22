@@ -29,7 +29,7 @@ namespace std
 		//Símbolos
 		SMB_OPEN_BRACKET /* [ */, SMB_CLOSE_BRACKET /* ] */, SMB_OPEN_PARENT /* ( */, SMB_CLOSE_PARENT /* ) */, SMB_DOT /* . */, SMB_COMMA /* , */, SMB_COLON /* : */, SMB_CARET /* ^ */,
 		SMB_AT /* @ */, SMB_OPEN_BRACE /* { */, SMB_CLOSE_BRACE /* } */, SMB_DOLLAR /* $ */, SMB_NUM_SIGN /* # */, SMB_OPEN_PARENT_ASTERISK /* (* */, SMB_CLOSE_PARENT_ASTERISK /* *) */,
-		SMB_OPEN_PARENT_DOT /* (. */, SMB_CLOSE_PARENT_DOT /* .) */, SMB_SLASH_SLASH /* // */, SMB_SEMICOLON /* ; */,
+		SMB_OPEN_PARENT_DOT /* (. */, SMB_CLOSE_PARENT_DOT /* .) */, SMB_SLASH_SLASH /* // */, SMB_DOUBLE_DOT /* .. */, SMB_SEMICOLON /* ; */,
 		
 		//Erros
 		ERR_CHAR, ERR_SIZE, ERR_END_FILE, ERR_FORMAT,
