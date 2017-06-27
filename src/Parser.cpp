@@ -23,7 +23,9 @@ void Parser::constant()
 		if(type == OP_PLUS || type == OP_MINUS)
 		{
 			getToken();
-			if(type != LIT_INT && type != LIT_FLOAT && !token->isIdentifier() /*identificador de constante*/)
+			if(type == LIT_INT || type == LIT_FLOAT || token->isIdentifier() /*identificador de constante*/)
+				getToken();
+			else
 				trataErro("Literal esperado");
 		}
 		else
@@ -72,12 +74,174 @@ void Parser::sitype()
     }
 }
 
+void Parser::aux_filist_p1()
+{
+	if(token->isIdentifier())
+	{
+		getToken();
+		if(type == OP_COLON)
+		{
+			getToken();
+			if(token->isIdentifier() /*Identificador de tipo*/)
+			{
+				getToken();
+				if(type == KW_OF)
+				{
+					getToken();
+					aux_filist_p2();
+				}
+			}
+			else
+				trataErro("Identificador de tipo esperado");
+		}
+		else
+			trataErro("Símbolo : esperado");
+	}
+	else
+		if(token->isIdentifier() /*Identificador de tipo*/)
+		{
+			getToken();
+			if(type == KW_OF)
+			{
+				getToken();
+				aux_filist_p2();
+			}
+		}
+		else
+			trataErro("Identificador ou identificador de tipo esperado");
+}
+
+void Parser::aux_filist_p2()
+{
+	if(type == LIT_STRING || token->isIdentifier() /*Identificador de constante*/ || type == LIT_INT || type == LIT_FLOAT)
+	{
+		getToken();
+		aux_filist_p3();
+	}
+	else
+		if(type == OP_PLUS || type == OP_MINUS)
+		{
+			getToken();
+			if(token->isIdentifier() /*Identificador de constante*/ || type == LIT_INT || type == LIT_FLOAT)
+			{
+				getToken();
+				aux_filist_p3();
+			}
+		}
+		else
+			if(type == SMB_SEMICOLON)
+			{
+				getToken();
+				aux_filist_p2();
+			}
+}
+
+void Parser::aux_filist_p3()
+{
+	if(type == SMB_COMMA)
+	{
+		getToken();
+		aux_filist_p2();
+	}
+	else
+		if(type == OP_COLON)
+		{
+			getToken();
+			if(type == SMB_OPEN_PARENT)
+			{
+				getToken();
+				filist();
+				if(type == SMB_CLOSE_PARENT)
+				{
+					getToken();
+					if(type == SMB_SEMICOLON)
+					{
+						getToken();
+						aux_filist_p2();
+					}
+				}
+				else
+					trataErro("Símbolo ) esperado");
+			}
+			else
+				trataErro("Símbolo ( esperado");
+		}
+		else
+			trataErro("Símbolo : ou , esperado");
+}
+
 void Parser::filist()
 {
+	if(token->isIdentifier())
+	{
+		getToken();
+		if(type == SMB_COMMA)
+		{
+			getToken();
+			filist();
+		}
+		else
+			if(type == OP_COLON)
+			{
+				getToken();
+				if(type == SMB_SEMICOLON)
+				{
+					getToken();
+					filist();
+				}
+				else
+					if(type == KW_CASE)
+					{
+						getToken();
+						aux_filist_p1();
+					}
+			}
+			else
+				trataErro("Símbolo : ou , esperado");
+	}
+	else
+		if(type == KW_CASE)
+		{
+			getToken();
+			aux_filist_p1();
+		}
 }
 
 void Parser::infipo()
 {
+	if(type == SMB_OPEN_BRACKET)
+	{
+		do
+		{
+			getToken();
+			expr();
+		}while(type == SMB_COMMA);
+		if(type == SMB_CLOSE_BRACKET)
+		{
+			getToken();
+			infipo();
+		}
+		else
+			trataErro("Símbolo ] ou , esperado");
+	}
+	else 
+		if(type ==  SMB_DOT)
+		{
+			getToken();
+			if(token->isIdentifier() /*Identificador de campo*/)
+			{
+				getToken();
+				infipo();
+			}
+			else
+				trataErro("Identificador de campo esperado");
+		}
+		else
+			if(type == SMB_AT)
+			{
+				getToken();
+				infipo();
+			}
 }
 
 void Parser::siexpr()

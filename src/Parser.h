@@ -20,6 +20,10 @@ namespace std
 		void getToken();
 		void constant();
 		void sitype();
+		//Auxiliar para filist
+		void aux_filist_p1();
+		void aux_filist_p2();
+		void aux_filist_p3();
 		void filist();
 		void infipo();
 		void siexpr();
