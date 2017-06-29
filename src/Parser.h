@@ -30,6 +30,8 @@ namespace std
 		void aux_filist_p3();
 		void filist();
 		void infipo();
+		void factor();
+		void term();
 		void siexpr();
 		void expr();
 		void palist();

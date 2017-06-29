@@ -258,16 +258,164 @@ void Parser::infipo()
 			}
 }
 
+void Parser::factor()
+{
+	if (type == LIT_INT || type == LIT_FLOAT)
+	{
+		//ToDo 73
+	}
+	else if (type == KW_NIL)
+	{
+		//ToDo 110
+	}
+	else if (isIdentifier(VAR_IDENTIFIER))
+	{
+		//ToDo 170
+		getToken();
+		infipo();
+		//ToDo 167
+	}
+	else if (isIdentifier(FUNCTION_IDENTIFIER))
+	{
+		//ToDo 77
+		getToken();
+		if (type == SMB_OPEN_PARENT)
+		{
+			do {
+				getToken();
+				expr();
+				//ToDo 78
+			} while (type == SMB_COMMA);
+			if (type == SMB_CLOSE_PARENT)
+			{
+				//ToDo 79
+			}
+			else
+			{
+				trataErro("Símbolo , ou ) esperado");
+			}
+		}
+		else if (type == SMB_AT)
+		{
+			//ToDo 79
+		}
+	}
+	else if (type == SMB_OPEN_PARENT)
+	{
+		getToken();
+		expr();
+		//ToDo 154
+		if (type != SMB_CLOSE_PARENT)
+		{
+			trataErro("Símbolo ) esperado");
+		}
+	}
+	else if (type == KW_NOT)
+	{
+		getToken();
+		factor();
+		//ToDO 155
+	}
+	else if (type == SMB_OPEN_BRACKET)
+	{
+		getToken();
+		if (type == SMB_CLOSE_BRACKET)
+		{
+			//ToDo 161
+		}
+		else 
+		{
+			do {
+				expr();
+				//ToDo 162
+				if (type == SMB_DOUBLE_DOT)
+				{
+					getToken();
+					expr();
+					//ToDo 163
+				}
+			} while(type == SMB_COMMA);
+			if (type != SMB_CLOSE_BRACKET)
+			{
+				trataErro("Símbolo , ou ] esperado");
+			}
+		}
+	}
+	else if (!isIdentifier(CONST_IDENTIFIER) && type != LIT_STRING)
+	{
+		trataErro("Literal, NIL, identificador, (, NOT ou [ esperado");
+	}
+	getToken();
+}
+
+void Parser::term()
+{
+	do {
+		factor();
+		//ToDo 153
+	} while(type == OP_MULT || type == OP_DIV || type == KW_DIV || type == KW_MOD || type == KW_AND);
+	getToken();
+}
+
 void Parser::siexpr()
 {
+	if (type == OP_PLUS || type == OP_MINUS)
+	{
+		getToken();
+		term();
+		//ToDo 152
+	}	
+	while(type == OP_PLUS || type == OP_MINUS || type == KW_OR)
+	{
+		getToken();
+		term();
+	}
 }
 
 void Parser::expr()
 {
+	siexpr();
+	if (type == OP_EQUALS || type == OP_LOWER || type == OP_HIGHER || type == OP_DIFF || type == OP_HIGHER_EQUALS
+		|| type == OP_LOWER_EQUALS || type == KW_IN)
+	{
+		getToken();
+		siexpr();
+		//ToDo 156
+	}
 }
 
 void Parser::palist()
 {
+	if (type == SMB_OPEN_PARENT)
+	{
+		do {
+			getToken();
+			if (type == KW_PROCEDURE || type == KW_FUNCTION || type == KW_VAR)
+			{
+				getToken();
+			}
+			else if (!token->isIdentifier())
+			{
+				trataErro("Palavras-chave PROCEDURE, FUNCTION ou VAR, ou Identificador esperado");
+			}
+			do {
+				if (token->isIdentifier())
+				{
+					getToken();
+				}			
+				else
+				{
+					trataErro("Identificador esperado");
+				}
+			} while(type == SMB_COMMA);
+			if (type == SMB_CLOSE_PARENT)
+			{
+				getToken();
+				return;
+			}
+		} while(type == SMB_SEMICOLON);
+		trataErro("Símbolo ; ou ) esperado");
+	}
 }
 
 void Parser::statm()
