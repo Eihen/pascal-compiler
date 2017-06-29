@@ -3,6 +3,8 @@
 
 #include "Token.h"
 #include "TokenQueue.h"
+#include "TableRow.h"
+#include <map>
 
 namespace std
 {
@@ -15,8 +17,10 @@ namespace std
 	private:
 		Token* token;
 		int type;
+        map<Token*, TableRow> table;
 		TokenQueue* tokenQueue = NULL;
 
+        bool isIdentifier(int desiredType);
 		void getToken();
 		void constant();
 		void sitype();
