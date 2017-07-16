@@ -222,7 +222,7 @@ void LexicalAnalyzer::analyze()
 	}
 	
     //Imprime na tela e gera arquivo a partir da lista de tokens
-    showTable();
+    //showTable();
     generateFile(); 
 }
 

@@ -5,6 +5,7 @@
 #include "TokenQueue.h"
 #include "TableRow.h"
 #include <map>
+#include <iostream>
 
 namespace std
 {
@@ -19,6 +20,7 @@ namespace std
 		int type;
         map<Token*, TableRow> table;
 		TokenQueue* tokenQueue = NULL;
+		std::queue<string> errorQueue;
 
         bool isIdentifier(int desiredType);
 		void getToken();
