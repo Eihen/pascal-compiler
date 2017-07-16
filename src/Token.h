@@ -41,11 +41,16 @@ namespace std
 	class Token
 	{
 		private:
-			string value;
 			int type, line, column;
 		protected:
 			void setType(int _type);
 		public:
+			//ToDo colocar isso private quando tirar o overload do less
+			string value;
+			Token()
+			{
+
+			}
 			Token(string _value, int _type, int _line, int _column)
 			{
 				value = _value;
@@ -60,6 +65,15 @@ namespace std
 			bool isIdentifier();
 			bool isType();
             bool isNumber();
+	};
+
+	//ToDo tirar isso quando não precisar mais
+	template<> struct less<Token>
+	{
+		bool operator() (const Token& lhs, const Token& rhs) const
+		{
+			return lhs.value < rhs.value;
+		}
 	};
 }
 

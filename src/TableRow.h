@@ -11,12 +11,12 @@ namespace std {
     class TableRow
     {
     private:
-            Token* token;
+            Token token;
             int type;
         public:
-            TableRow(Token* _token, int _type);
+            TableRow(Token _token, int _type);
             int getType();
-            Token* getToken();
+            Token getToken();
             ~TableRow();
     
             

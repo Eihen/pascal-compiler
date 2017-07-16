@@ -15,14 +15,14 @@ namespace std
 			~TokenQueue();
 			
 			void finish();
-			void enqueue(Token* token);
-			Token* dequeue();
+			void enqueue(Token token);
+			Token dequeue();
 			
 		private:
 			bool finished;
 			std::mutex lock;
 			std::condition_variable not_empty;
-			std::queue<Token*> tokenQueue;
+			std::queue<Token> tokenQueue;
 	};
 }
 

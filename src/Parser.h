@@ -16,9 +16,9 @@ namespace std
 		~Parser();
 		
 	private:
-		Token* token;
+		Token token;
 		int type;
-        map<Token*, TableRow> table;
+        map<Token, TableRow> table;
 		TokenQueue* tokenQueue = NULL;
 		std::queue<string> errorQueue;
 

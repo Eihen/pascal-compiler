@@ -2,13 +2,13 @@
 
 using namespace std;
 
-TableRow::TableRow(Token* _token, int _type)
+TableRow::TableRow(Token _token, int _type)
 {
     token = _token;
     type = _type;
 }
 
-Token* TableRow::getToken()
+Token TableRow::getToken()
 {
     return token;
 }

@@ -28,9 +28,10 @@ Parser::Parser(TokenQueue* _tokenQueue)
 
 bool Parser::isIdentifier(int desiredType)
 {
-    if (token->isIdentifier()) 
+    if (token.isIdentifier()) 
     {
-        map<Token*, TableRow>::iterator it = table.find(token);
+        //ToDo @lucasfernog disse que ia tirar isso, se alguém o fizer tirar o que ta marcado no Token.h
+        map<Token, TableRow>::iterator it = table.find(token);
         if (it != table.end())
             return it->second.getType() == desiredType;
     }
@@ -41,7 +42,7 @@ void Parser::getToken()
 {
 	//Pega próxima token
 	token = tokenQueue->dequeue();
-	type = token->getType();
+	type = token.getType();
 	
 	//Token de erro - adicionar na lista de errros
 	while(type >= ERR_CHAR && type <= ERR_FORMAT)
@@ -60,10 +61,11 @@ void Parser::getToken()
 			case ERR_FORMAT:
 				trataErro("Cadeia inválida");
 			break;
+			default: break;
 		}
 		//Pega próxima token
 		token = tokenQueue->dequeue();
-		type = token->getType();
+		type = token.getType();
 	}
 }
 
@@ -92,7 +94,7 @@ void Parser::sitype()
         if(type == SMB_OPEN_PARENT) {
             do {
                 getToken();
-                if (token->isIdentifier()) {
+                if (token.isIdentifier()) {
                     getToken();
                     if (type != SMB_COMMA && type != SMB_CLOSE_PARENT) {
                         trataErro("Vírgula ou parenteses esperado");
@@ -129,7 +131,7 @@ void Parser::sitype()
 void Parser::aux_filist_p1()
 {
     //TODO if else incorreto
-	if(token->isIdentifier())
+	if(token.isIdentifier())
 	{
 		getToken();
 		if(type == OP_COLON)
@@ -225,10 +227,10 @@ void Parser::aux_filist_p3()
 
 void Parser::filist()
 {
-	if(token->isIdentifier())
+	if(token.isIdentifier())
 	{
         //registra token na tabela
-        table.insert(pair<Token*, TableRow>(token, TableRow(token, FIELD_IDENTIFIER)));
+        table.insert(pair<Token, TableRow>(token, TableRow(token, FIELD_IDENTIFIER)));
 		getToken();
 		if(type == SMB_COMMA)
 		{
@@ -435,12 +437,12 @@ void Parser::palist()
 			{
 				getToken();
 			}
-			else if (!token->isIdentifier())
+			else if (!token.isIdentifier())
 			{
 				trataErro("Palavras-chave PROCEDURE, FUNCTION ou VAR, ou Identificador esperado");
 			}
 			do {
-				if (token->isIdentifier())
+				if (token.isIdentifier())
 				{
 					getToken();
 				}			
@@ -462,7 +464,7 @@ void Parser::palist()
 void Parser::statm()
 {
     //number
-    if (token->isNumber()) {
+    if (token.isNumber()) {
         getToken();
         if (type != SMB_COLON)
             trataErro(": esperado");
@@ -546,11 +548,11 @@ void Parser::statm()
         if (type == KW_OF) {
             do {
                 getToken();
-                if (type == LIT_STRING || isIdentifier(CONST_IDENTIFIER) || token->isNumber())
+                if (type == LIT_STRING || isIdentifier(CONST_IDENTIFIER) || token.isNumber())
                     getToken();
                 else if (type == OP_PLUS || type == OP_MINUS) {
                     getToken();
-                    if (isIdentifier(CONST_IDENTIFIER) || token->isNumber()) 
+                    if (isIdentifier(CONST_IDENTIFIER) || token.isNumber()) 
                         getToken();
                     else {
                         trataErro("constante esperada");
@@ -679,7 +681,7 @@ void Parser::statm()
 
 void Parser::read_type() 
 {
-    if (!token->isType()) {
+    if (!token.isType()) {
         if (type == KW_PACKED)
             getToken();
         //ARRAY
@@ -764,9 +766,9 @@ void Parser::block()
     //CONST
     else if (type == KW_CONST) {
         getToken();
-        if (token->isIdentifier()) {
+        if (token.isIdentifier()) {
             //registra token na tabela
-            table.insert(pair<Token*, TableRow>(token, TableRow(token, CONST_IDENTIFIER)));
+            table.insert(pair<Token, TableRow>(token, TableRow(token, CONST_IDENTIFIER)));
             do {
                 getToken();
                 if (type == OP_EQUALS) {
@@ -781,7 +783,7 @@ void Parser::block()
                     trataErro("Operador = esperado");
                     break;
                 }
-            } while (token->isIdentifier());
+            } while (token.isIdentifier());
         }
         else 
             trataErro("Identificador esperado");
@@ -789,9 +791,9 @@ void Parser::block()
     //TYPE
     else if (type == KW_TYPE) {
         getToken();
-        if (token->isIdentifier()) {
+        if (token.isIdentifier()) {
             //registra token na tabela
-            table.insert(pair<Token*, TableRow>(token, TableRow(token, TYPE_IDENTIFIER)));
+            table.insert(pair<Token, TableRow>(token, TableRow(token, TYPE_IDENTIFIER)));
             do {
                 getToken();
                 if (type == OP_EQUALS) {
@@ -806,7 +808,7 @@ void Parser::block()
                     trataErro("Operador = esperado");
                     break;
                 }
-            } while (token->isIdentifier());
+            } while (token.isIdentifier());
         }
         else 
             trataErro("Identificador esperado");
@@ -815,14 +817,14 @@ void Parser::block()
     else if (type == KW_VAR) {
     
         getToken();
-        if (token->isIdentifier()) {
+        if (token.isIdentifier()) {
             //registra token na tabela
-            table.insert(pair<Token*, TableRow>(token, TableRow(token, VAR_IDENTIFIER)));
+            table.insert(pair<Token, TableRow>(token, TableRow(token, VAR_IDENTIFIER)));
             do {
                 getToken();
                 if (type == SMB_COMMA) {
                     getToken();
-                    if (!token->isIdentifier()) //nesse ponto, identificador é obrigatório
+                    if (!token.isIdentifier()) //nesse ponto, identificador é obrigatório
                         trataErro("Identificador esperado");
                 }
                 else if (type == SMB_COLON) {
@@ -832,7 +834,7 @@ void Parser::block()
                         //se não for identificador, sairá do laço
                     }
                 }
-            } while (token->isIdentifier());
+            } while (token.isIdentifier());
         }
         else 
             trataErro("Identificador esperado");
@@ -840,9 +842,9 @@ void Parser::block()
     //PROCEDURE
     else if (type == KW_PROCEDURE) {
         getToken();
-        if (token->isIdentifier()) {
+        if (token.isIdentifier()) {
             //registra token na tabela
-            table.insert(pair<Token*, TableRow>(token, TableRow(token, PROCEDURE_IDENTIFIER)));
+            table.insert(pair<Token, TableRow>(token, TableRow(token, PROCEDURE_IDENTIFIER)));
             
             getToken();
             palist();
@@ -863,14 +865,14 @@ void Parser::block()
     //FUNCTION
     else if (type == KW_FUNCTION) {
         getToken();
-        if (token->isIdentifier()) {
+        if (token.isIdentifier()) {
             //registra token na tabela
-            table.insert(pair<Token*, TableRow>(token, TableRow(token, FUNCTION_IDENTIFIER)));
+            table.insert(pair<Token, TableRow>(token, TableRow(token, FUNCTION_IDENTIFIER)));
             getToken();
             palist();
             if (type == SMB_COLON) {
                 getToken();
-                if (token->isType()) {
+                if (token.isType()) {
                     getToken();
                     if (type == SMB_SEMICOLON) {
                         getToken();
@@ -916,12 +918,12 @@ void Parser::progrm()
 {
     if (type == KW_PROGRAM) {
         getToken();
-        if (token->isIdentifier()) {
+        if (token.isIdentifier()) {
             getToken();
             if (type == SMB_OPEN_PARENT) {
                 do {
                     getToken();
-                    if (token->isIdentifier()) {
+                    if (token.isIdentifier()) {
                         getToken();
                         if (type != SMB_COMMA && type != SMB_CLOSE_PARENT) {
                             trataErro("Vírgula ou parenteses esperado");
@@ -959,7 +961,7 @@ void Parser::progrm()
 
 void Parser::trataErro(string message)
 {
-    message += " (linha: " + to_string(token->getLine()) + ", coluna: " + to_string(token->getColumn()) + ")";
+    message += " (linha: " + to_string(token.getLine()) + ", coluna: " + to_string(token.getColumn()) + ")";
     errorQueue.push(message);
 }
 	

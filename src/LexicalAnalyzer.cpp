@@ -21,7 +21,7 @@ void LexicalAnalyzer::addToken(string value, int type, int line, int column)
 	
 	if (tokenQueue != NULL)
 	{
-		tokenQueue->enqueue(&token);
+		tokenQueue->enqueue(token);
 	}
 	tokens.push_back(token);
 }
