@@ -1,4 +1,3 @@
-#include <cstdio>
 #include <iostream>
 #include <string>
 #include <thread>
@@ -22,11 +21,11 @@ void parserCallFromThread()
 }
 
 int main() {
-	string fileName = "teste.txt";
+	string fileName;
 	
-	//TODO
-	//cout << "Digite o caminho do arquivo a ser analisado: " << endl;
-	//cin >> nomeArquivo;
+	cout << "Digite o caminho do arquivo a ser compilado: ";
+	cin >> fileName;
+	
 	thread lexicalThread(lexicalCallFromThread, fileName.c_str());
 	thread parserThread(parserCallFromThread);
 	

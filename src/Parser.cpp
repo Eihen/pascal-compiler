@@ -4,9 +4,26 @@ using namespace std;
 
 Parser::Parser(TokenQueue* _tokenQueue)
 {
-	tokenQueue = _tokenQueue;
-	getToken();
-	progrm();
+	try
+	{
+		tokenQueue = _tokenQueue;
+		getToken();
+		progrm();
+	}
+	catch(int e)
+	{
+		trataErro("Fim do programa não encontrado");
+	}
+	
+	//Verifica se existem erros na compilação do programa, em caso positivo exibe os erros
+	if(errorQueue.empty())
+		cout << "Compilação terminada com sucessso" << endl;
+	else
+		while(!errorQueue.empty())
+		{
+			cout << errorQueue.front() << endl;
+			errorQueue.pop();
+		}
 }	
 
 bool Parser::isIdentifier(int desiredType)
@@ -22,8 +39,32 @@ bool Parser::isIdentifier(int desiredType)
 
 void Parser::getToken()
 {
+	//Pega próxima token
 	token = tokenQueue->dequeue();
 	type = token->getType();
+	
+	//Token de erro - adicionar na lista de errros
+	while(type >= ERR_CHAR && type <= ERR_FORMAT)
+	{
+		switch(type)
+		{
+			case ERR_CHAR:
+				trataErro("Caracter inválido");
+			break;
+			case ERR_SIZE:
+				trataErro("Ident. com muitos carac.");
+			break;
+			case ERR_END_FILE:
+				trataErro("Fim inesperado de arquivo");
+			break;
+			case ERR_FORMAT:
+				trataErro("Cadeia inválida");
+			break;
+		}
+		//Pega próxima token
+		token = tokenQueue->dequeue();
+		type = token->getType();
+	}
 }
 
 void Parser::constant()
@@ -919,6 +960,7 @@ void Parser::progrm()
 void Parser::trataErro(string message)
 {
     message += " (linha: " + to_string(token->getLine()) + ", coluna: " + to_string(token->getColumn()) + ")";
+    errorQueue.push(message);
 }
 	
 Parser::~Parser()
