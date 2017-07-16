@@ -29,6 +29,7 @@
 *.exe
 *.out
 *.app
+Debug/pascal_compiler
 
 # IDE
 *.project
@@ -49,3 +50,9 @@ src/main
 Debug/saida\.txt
 
 pascal-project\.txt
+
+# CLion
+.idea/
+
+# CMake
+cmake-build-debug/
