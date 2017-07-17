@@ -864,13 +864,7 @@ void Parser::block()
                 getToken();
                 if (type == SMB_COMMA) {
                     getToken();
-                    if (token.isIdentifier()) //nesse ponto, identificador é obrigatório
-                    {
-						//registra token na tabela
-						varTable.insert(pair<string, VarEntry>(tokenHash(), VarEntry()));
-						getToken();
-					}  
-					else
+                    if (!token.isIdentifier()) //nesse ponto, identificador é obrigatório
                         trataErro("Identificador esperado");
                 }
                 else if (type == SMB_COLON) {
@@ -884,7 +878,7 @@ void Parser::block()
 						trataErro("; esperado");
                 }
                 else
-					trataErro(": esperado");
+					trataErro(": ou , esperado");
             } while (token.isIdentifier());
         }
         else 
