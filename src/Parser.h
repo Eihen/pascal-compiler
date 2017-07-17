@@ -23,6 +23,7 @@ namespace std
 		std::queue<string> errorQueue;
 
         bool isIdentifier(int desiredType);
+        bool verify_and_get(bool condition);
 		void getToken();
 		void constant();
 		void sitype();

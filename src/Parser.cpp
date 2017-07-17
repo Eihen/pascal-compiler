@@ -69,6 +69,16 @@ void Parser::getToken()
 	}
 }
 
+bool Parser::verify_and_get(bool condition)
+{
+	if(condition)
+	{
+		getToken();
+		return true;
+	}
+	return false;
+}
+
 void Parser::constant()
 {
 	if(type == LIT_STRING || type == LIT_INT || type == LIT_FLOAT || isIdentifier(CONST_IDENTIFIER))
@@ -112,15 +122,9 @@ void Parser::sitype()
 		else {
             constant();
             //TODO ".." deveria ser um token
-            getToken();
-            if (type == SMB_DOT) {
+            if (type == SMB_DOUBLE_DOT) {
                 getToken();
-                if (type == SMB_DOT) {
-                    getToken();
-                    constant();
-                }
-                else
-                     trataErro("Delimitador .. esperado");
+                constant();
             }
             else
                 trataErro("Delimitador .. esperado");
@@ -306,10 +310,12 @@ void Parser::factor()
 	if (type == LIT_INT || type == LIT_FLOAT)
 	{
 		//ToDo 73
+		getToken();
 	}
 	else if (type == KW_NIL)
 	{
 		//ToDo 110
+		getToken();
 	}
 	else if (isIdentifier(VAR_IDENTIFIER))
 	{
@@ -332,13 +338,14 @@ void Parser::factor()
 			if (type == SMB_CLOSE_PARENT)
 			{
 				//ToDo 79
+				getToken();
 			}
 			else
 			{
 				trataErro("Símbolo , ou ) esperado");
 			}
 		}
-		else if (type == SMB_AT)
+		else
 		{
 			//ToDo 79
 		}
@@ -348,10 +355,10 @@ void Parser::factor()
 		getToken();
 		expr();
 		//ToDo 154
-		if (type != SMB_CLOSE_PARENT)
-		{
+		if (type == SMB_CLOSE_PARENT)
+			getToken();
+		else
 			trataErro("Símbolo ) esperado");
-		}
 	}
 	else if (type == KW_NOT)
 	{
@@ -365,6 +372,7 @@ void Parser::factor()
 		if (type == SMB_CLOSE_BRACKET)
 		{
 			//ToDo 161
+			getToken();
 		}
 		else 
 		{
@@ -377,18 +385,17 @@ void Parser::factor()
 					expr();
 					//ToDo 163
 				}
-			} while(type == SMB_COMMA);
+			} while(verify_and_get(type == SMB_COMMA));
 			if (type != SMB_CLOSE_BRACKET)
 			{
 				trataErro("Símbolo , ou ] esperado");
 			}
 		}
 	}
-	else if (!isIdentifier(CONST_IDENTIFIER) && type != LIT_STRING)
-	{
+	else if (isIdentifier(CONST_IDENTIFIER) || type == LIT_STRING)
+		getToken();
+	else
 		trataErro("Literal, NIL, identificador, (, NOT ou [ esperado");
-	}
-	getToken();
 }
 
 void Parser::term()
@@ -396,8 +403,7 @@ void Parser::term()
 	do {
 		factor();
 		//ToDo 153
-	} while(type == OP_MULT || type == OP_DIV || type == KW_DIV || type == KW_MOD || type == KW_AND);
-	getToken();
+	} while( verify_and_get(type == OP_MULT || type == OP_DIV || type == KW_DIV || type == KW_MOD || type == KW_AND) );
 }
 
 void Parser::siexpr()
@@ -433,24 +439,37 @@ void Parser::palist()
 	{
 		do {
 			getToken();
-			if (type == KW_PROCEDURE || type == KW_FUNCTION || type == KW_VAR)
+			if (type == KW_PROCEDURE)
 			{
 				getToken();
+				do {
+					if (token.isIdentifier())
+						getToken();			
+					else
+						trataErro("Identificador esperado");
+				} while(type == SMB_COMMA);
 			}
-			else if (!token.isIdentifier())
+			else if (type == KW_FUNCTION || type == KW_VAR || token.isIdentifier())
 			{
-				trataErro("Palavras-chave PROCEDURE, FUNCTION ou VAR, ou Identificador esperado");
-			}
-			do {
-				if (token.isIdentifier())
-				{
+				if(type == KW_FUNCTION || type == KW_VAR)
 					getToken();
-				}			
+				do {
+					if (token.isIdentifier())
+						getToken();			
+					else
+						trataErro("Identificador esperado");
+				} while(type == SMB_COMMA);
+				if(type == SMB_COLON)
+					getToken();
 				else
-				{
-					trataErro("Identificador esperado");
-				}
-			} while(type == SMB_COMMA);
+					trataErro(": esperado");
+				if(isIdentifier(TYPE_IDENTIFIER))
+					getToken();
+				else
+					trataErro("Identificador de tipo esperado");
+			}
+			else
+				trataErro("Palavras-chave PROCEDURE, FUNCTION ou VAR, ou Identificador esperado");
 			if (type == SMB_CLOSE_PARENT)
 			{
 				getToken();
@@ -470,10 +489,9 @@ void Parser::statm()
             trataErro(": esperado");
     }
     //var identifier
-    else if (isIdentifier(VAR_IDENTIFIER)) {
+    if (isIdentifier(VAR_IDENTIFIER)) {
         getToken();
         infipo();
-        getToken();
         if (type == OP_ASSIGN) {
             getToken();
             expr();
@@ -501,36 +519,37 @@ void Parser::statm()
                     getToken();
                 else
                     expr();
-                getToken();
             } while (type == SMB_COMMA);
             
-            if (type != SMB_CLOSE_PARENT)
+            if (type == SMB_CLOSE_PARENT)
+				getToken();
+			else
                 trataErro(") esperado");
         }
         else
-            trataErro("( esperado");
-        //TODO lambda
+        {
+            //ToDo 79
+        }
     }
     //begin
     else if (type == KW_BEGIN) {
         do {
             getToken();
             statm();
-            getToken();
         } while (type == SMB_SEMICOLON);
         
-        if (type != KW_END)
+        if (type == KW_END)
+			getToken();
+		else
             trataErro("end esperado");
     }
     //if
     else if (type == KW_IF) {
         getToken();
         expr();
-        getToken();
         if (type == KW_THEN) {
             getToken();
             statm();
-            getToken();
             if (type == KW_ELSE) {
                 getToken();
                 statm();
@@ -544,7 +563,6 @@ void Parser::statm()
     else if (type == KW_CASE) {
         getToken();
         expr();
-        getToken();
         if (type == KW_OF) {
             do {
                 getToken();
@@ -571,7 +589,6 @@ void Parser::statm()
                 if (type == SMB_COLON) {
                     getToken();
                     statm();
-                    getToken();
                     //; ou end esperado nesse ponto
                 }
                 else {
@@ -581,7 +598,9 @@ void Parser::statm()
                 
             } while (type == SMB_SEMICOLON);
             
-            if (type != KW_END)
+            if (type == KW_END)
+				getToken();
+			else
                 trataErro("end esperado");
         }
         else
@@ -591,20 +610,18 @@ void Parser::statm()
     else if (type == KW_WHILE) {
         getToken();
         expr();
-        getToken();
         if (type == KW_DO) {
             getToken();
             statm();
         }
         else
-            trataErro("do esperado");
+            trataErro("'do' esperado");
     }
     //repeat
     else if (type == KW_REPEAT) {
         do {
             getToken();
             statm();
-            getToken();
         } while (type == SMB_SEMICOLON);
         
         //until
@@ -613,32 +630,29 @@ void Parser::statm()
             expr();
         }
         else
-            trataErro("until esperado");
+            trataErro("'until' esperado");
     }
     //for
     else if (type == KW_FOR) {
         getToken();
         if (isIdentifier(VAR_IDENTIFIER)) { 
             getToken();
-            infipo();   
-            getToken();
+            infipo();
             if (type == OP_ASSIGN) {
                 getToken();
                 expr();
-                getToken();
                 if (type == KW_TO || type == KW_DOWNTO) {
                     getToken();
                     expr();
-                    getToken();
                     if (type == KW_DO) {
                         getToken();
                         statm();
                     }
                     else
-                        trataErro("do esperado");
+                        trataErro("'do' esperado");
                 }
                 else
-                    trataErro("to ou downto eesperado");
+                    trataErro("'to' ou 'downto' eesperado");
             }
             else
                 trataErro(":= esperado");
@@ -654,7 +668,6 @@ void Parser::statm()
             if (isIdentifier(VAR_IDENTIFIER)) {
                 getToken();
                 infipo();
-                getToken();
                 //se este token for uma vírgula, continuará o laço
             }
             else {
@@ -669,19 +682,30 @@ void Parser::statm()
             statm();
         }
         else
-            trataErro("do esperado");
+            trataErro("'do' esperado");
     }
     //goto
     else if (type == KW_GOTO) {
         getToken();
-        if (type != LIT_INT)
+        if (type == LIT_INT)
+			getToken();
+		else
             trataErro("Número inteiro esperado");
     }
 }
 
 void Parser::read_type() 
 {
-    if (!token.isType()) {
+    if (type == SMB_AT) 
+    {
+		getToken();
+		if(isIdentifier(TYPE_IDENTIFIER))
+			getToken();
+		else
+			trataErro("Identificador de tipo esperado");
+	}
+	else
+	{
         if (type == KW_PACKED)
             getToken();
         //ARRAY
@@ -691,7 +715,6 @@ void Parser::read_type()
                 do {
                     getToken();
                     sitype();
-                    getToken();
                 } while (type == SMB_COMMA);
                 
                 if (type == SMB_CLOSE_BRACKET) {
@@ -701,7 +724,7 @@ void Parser::read_type()
                         read_type();
                     }
                     else
-                        trataErro("of esperado");
+                        trataErro("'of' esperado");
                 }
                 else
                     trataErro("] esperado");
@@ -714,27 +737,30 @@ void Parser::read_type()
         else if (type == KW_FILE) {
             getToken();
             if (type == KW_OF) {
+				getToken();
                 read_type();
             }
             else
-                trataErro("of esperado");
+                trataErro("'of' esperado");
         }
         //SET
         else if (type == KW_SET) {
             getToken();
             if (type == KW_OF) {
+				getToken();
                 sitype();
             }
             else
-                trataErro("of esperado");
+                trataErro("'of' esperado");
         }
         //RECORD
         else if (type == KW_RECORD) {
             getToken();
             filist();
-            getToken();
-            if (type != KW_END) 
-                trataErro("end esperado");
+            if (type == KW_END)
+				getToken();
+			else
+                trataErro("'end' esperado");
         }
         else
             sitype();
@@ -764,12 +790,12 @@ void Parser::block()
         getToken();
     }
     //CONST
-    else if (type == KW_CONST) {
+    if (type == KW_CONST) {
         getToken();
         if (token.isIdentifier()) {
-            //registra token na tabela
-            table.insert(pair<Token, TableRow>(token, TableRow(token, CONST_IDENTIFIER)));
             do {
+				//registra token na tabela
+				table.insert(pair<Token, TableRow>(token, TableRow(token, CONST_IDENTIFIER)));
                 getToken();
                 if (type == OP_EQUALS) {
                     getToken();
@@ -778,6 +804,11 @@ void Parser::block()
                         getToken();
                         //se for identificador: continuará o laço; caso contrário, continuará leitura do bloco
                     }
+                    else
+					{
+						trataErro("; esperado");
+						break;
+					}
                 }
                 else {
                     trataErro("Operador = esperado");
@@ -789,12 +820,12 @@ void Parser::block()
             trataErro("Identificador esperado");
     }
     //TYPE
-    else if (type == KW_TYPE) {
+    if (type == KW_TYPE) {
         getToken();
         if (token.isIdentifier()) {
-            //registra token na tabela
-            table.insert(pair<Token, TableRow>(token, TableRow(token, TYPE_IDENTIFIER)));
             do {
+				//registra token na tabela
+				table.insert(pair<Token, TableRow>(token, TableRow(token, TYPE_IDENTIFIER)));
                 getToken();
                 if (type == OP_EQUALS) {
                     getToken();
@@ -803,6 +834,11 @@ void Parser::block()
                         getToken();
                         //se for identificador: continuará o laço; caso contrário, continuará leitura do bloco
                     }
+                    else
+                    {
+						trataErro("; esperado");
+						break;
+					}
                 }
                 else {
                     trataErro("Operador = esperado");
@@ -814,92 +850,104 @@ void Parser::block()
             trataErro("Identificador esperado");
     }
     //VAR
-    else if (type == KW_VAR) {
-    
+    if (type == KW_VAR) {   
         getToken();
         if (token.isIdentifier()) {
-            //registra token na tabela
-            table.insert(pair<Token, TableRow>(token, TableRow(token, VAR_IDENTIFIER)));
             do {
+				 //registra token na tabela
+				table.insert(pair<Token, TableRow>(token, TableRow(token, VAR_IDENTIFIER)));
                 getToken();
                 if (type == SMB_COMMA) {
                     getToken();
-                    if (!token.isIdentifier()) //nesse ponto, identificador é obrigatório
+                    if (token.isIdentifier()) //nesse ponto, identificador é obrigatório
+                    {
+						//registra token na tabela
+						table.insert(pair<Token, TableRow>(token, TableRow(token, VAR_IDENTIFIER)));
+						getToken();
+					}  
+					else
                         trataErro("Identificador esperado");
                 }
                 else if (type == SMB_COLON) {
+					getToken();
                     read_type();
                     if (type == SMB_SEMICOLON) {
                         getToken();
                         //se não for identificador, sairá do laço
                     }
+                    else
+						trataErro("; esperado");
                 }
+                else
+					trataErro(": esperado");
             } while (token.isIdentifier());
         }
         else 
             trataErro("Identificador esperado");
     }
-    //PROCEDURE
-    else if (type == KW_PROCEDURE) {
-        getToken();
-        if (token.isIdentifier()) {
-            //registra token na tabela
-            table.insert(pair<Token, TableRow>(token, TableRow(token, PROCEDURE_IDENTIFIER)));
-            
-            getToken();
-            palist();
-            if (type == SMB_SEMICOLON) {
-                getToken();
-                block();
-                if (type == SMB_SEMICOLON)
-                    getToken();
-                else
-                    trataErro("Ponto e vírgula esperado");
-            }
-            else
-                trataErro("Ponto e vírgula esperado");
-        }
-        else
-            trataErro("Identificador esperado");
-    }
-    //FUNCTION
-    else if (type == KW_FUNCTION) {
-        getToken();
-        if (token.isIdentifier()) {
-            //registra token na tabela
-            table.insert(pair<Token, TableRow>(token, TableRow(token, FUNCTION_IDENTIFIER)));
-            getToken();
-            palist();
-            if (type == SMB_COLON) {
-                getToken();
-                if (token.isType()) {
-                    getToken();
-                    if (type == SMB_SEMICOLON) {
-                        getToken();
-                        block();
-                        if (type == SMB_SEMICOLON)
-                            getToken();
-                        else
-                            trataErro("Ponto e vírgula esperado");
-                    }
-                    else
-                        trataErro("Ponto e vírgula esperado");
-                }
-                else
-                    trataErro("Identificador de tipo esperado");
-            }
-            else 
-                trataErro(": esperado");
-        }
-        else
-            trataErro("Identificador esperado");
-    }
+    do
+    {
+		//PROCEDURE
+		if (type == KW_PROCEDURE) {
+			getToken();
+			if (token.isIdentifier()) {
+				//registra token na tabela
+				table.insert(pair<Token, TableRow>(token, TableRow(token, PROCEDURE_IDENTIFIER)));
+				
+				getToken();
+				palist();
+				if (type == SMB_SEMICOLON) {
+					getToken();
+					block();
+					if (type == SMB_SEMICOLON)
+						getToken();
+					else
+						trataErro("Ponto e vírgula esperado");
+				}
+				else
+					trataErro("Ponto e vírgula esperado");
+			}
+			else
+				trataErro("Identificador esperado");
+		}	
+		//FUNCTION
+		if (type == KW_FUNCTION) {
+			getToken();
+			if (token.isIdentifier()) {
+				//registra token na tabela
+				table.insert(pair<Token, TableRow>(token, TableRow(token, FUNCTION_IDENTIFIER)));
+				getToken();
+				palist();
+				if (type == SMB_COLON) {
+					getToken();
+					if (token.isType()) {
+						getToken();
+						if (type == SMB_SEMICOLON) {
+							getToken();
+							block();
+							if (type == SMB_SEMICOLON)
+								getToken();
+							else
+								trataErro("Ponto e vírgula esperado");
+						}
+						else
+							trataErro("Ponto e vírgula esperado");
+					}
+					else
+						trataErro("Identificador de tipo esperado");
+				}
+				else 
+					trataErro(": esperado");
+			}
+			else
+				trataErro("Identificador esperado");
+		}
+	}while(verify_and_get(type == SMB_SEMICOLON));
     //BEGIN
-    else if (type == KW_BEGIN) {
+    if (type == KW_BEGIN) {
         do {
             getToken();
             statm();
-            getToken();
         } while (type == SMB_SEMICOLON);
         
         if (type == KW_END)
@@ -911,7 +959,6 @@ void Parser::block()
     }
     else 
         trataErro("Label, Const, Type, Var, Procedure, Function ou Begin esperado");
-    block();
 }
 
 void Parser::progrm()
