@@ -3,7 +3,13 @@
 
 #include "Token.h"
 #include "TokenQueue.h"
-#include "TableRow.h"
+#include "entry/VarEntry.h"
+#include "entry/ConstEntry.h"
+#include "entry/TypeEntry.h"
+#include "entry/FieldEntry.h"
+#include "entry/FunctionEntry.h"
+#include "entry/ProcedureEntry.h"
+#include "entry/SymbolTableEntry.h"
 #include <map>
 #include <iostream>
 
@@ -18,11 +24,17 @@ namespace std
 	private:
 		Token token;
 		int type;
-        map<Token, TableRow> table;
+        map<string, VarEntry> varTable;
+        map<string, ConstEntry> constTable;
+        map<string, TypeEntry> typeTable;
+        map<string, FieldEntry> fieldTable;
+        map<string, FunctionEntry> functionTable;
+        map<string, ProcedureEntry> procedureTable;
 		TokenQueue* tokenQueue = NULL;
 		std::queue<string> errorQueue;
 
-        bool isIdentifier(int desiredType);
+        template<class T> bool isIdentifier(map<string, T> table);
+        string tokenHash();
         bool verify_and_get(bool condition);
 		void getToken();
 		void constant();
