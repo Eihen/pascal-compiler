@@ -26,16 +26,21 @@ Parser::Parser(TokenQueue* _tokenQueue)
 		}
 }	
 
-bool Parser::isIdentifier(int desiredType)
+template<class T> bool Parser::isIdentifier(map<string, T> table)
 {
     if (token.isIdentifier()) 
     {
         //ToDo @lucasfernog disse que ia tirar isso, se alguém o fizer tirar o que ta marcado no Token.h
-        map<Token, TableRow>::iterator it = table.find(token);
+        typename map<string, T>::iterator it = table.find(tokenHash());
         if (it != table.end())
-            return it->second.getType() == desiredType;
+            return true;
     }
     return false;
+}
+
+string Parser::tokenHash()
+{
+    return token.getValue();
 }
 
 void Parser::getToken()
@@ -78,13 +83,13 @@ bool Parser::verify_and_get(bool condition)
 
 void Parser::constant()
 {
-	if(type == LIT_STRING || type == LIT_INT || type == LIT_FLOAT || isIdentifier(CONST_IDENTIFIER))
+	if(type == LIT_STRING || type == LIT_INT || type == LIT_FLOAT || isIdentifier(constTable))
 		getToken();
 	else
 		if(type == OP_PLUS || type == OP_MINUS)
 		{
 			getToken();
-			if(type == LIT_INT || type == LIT_FLOAT || isIdentifier(CONST_IDENTIFIER))
+			if(type == LIT_INT || type == LIT_FLOAT || isIdentifier(constTable))
 				getToken();
 			else
 				trataErro("Literal esperado");
@@ -169,7 +174,7 @@ void Parser::aux_filist_p1()
 
 void Parser::aux_filist_p2()
 {
-	if(type == LIT_STRING || isIdentifier(CONST_IDENTIFIER) || type == LIT_INT || type == LIT_FLOAT)
+	if(type == LIT_STRING || isIdentifier(constTable) || type == LIT_INT || type == LIT_FLOAT)
 	{
 		getToken();
 		aux_filist_p3();
@@ -178,7 +183,7 @@ void Parser::aux_filist_p2()
 		if(type == OP_PLUS || type == OP_MINUS)
 		{
 			getToken();
-			if(isIdentifier(CONST_IDENTIFIER) || type == LIT_INT || type == LIT_FLOAT)
+			if(isIdentifier(constTable) || type == LIT_INT || type == LIT_FLOAT)
 			{
 				getToken();
 				aux_filist_p3();
@@ -231,7 +236,7 @@ void Parser::filist()
 	if(token.isIdentifier())
 	{
         //registra token na tabela
-        table.insert(pair<Token, TableRow>(token, TableRow(token, FIELD_IDENTIFIER)));
+        fieldTable.insert(pair<string, FieldEntry>(tokenHash(), FieldEntry()));
 		getToken();
 		if(type == SMB_COMMA)
 		{
@@ -286,7 +291,7 @@ void Parser::infipo()
 		if(type ==  SMB_DOT)
 		{
 			getToken();
-			if(isIdentifier(FIELD_IDENTIFIER))
+			if(isIdentifier(fieldTable))
 			{
 				getToken();
 				infipo();
@@ -314,14 +319,14 @@ void Parser::factor()
 		//ToDo 110
 		getToken();
 	}
-	else if (isIdentifier(VAR_IDENTIFIER))
+	else if (isIdentifier(varTable))
 	{
 		//ToDo 170
 		getToken();
 		infipo();
 		//ToDo 167
 	}
-	else if (isIdentifier(FUNCTION_IDENTIFIER))
+	else if (isIdentifier(functionTable))
 	{
 		//ToDo 77
 		getToken();
@@ -389,7 +394,7 @@ void Parser::factor()
 			}
 		}
 	}
-	else if (isIdentifier(CONST_IDENTIFIER) || type == LIT_STRING)
+	else if (isIdentifier(constTable) || type == LIT_STRING)
 		getToken();
 	else
 		trataErro("Literal, NIL, identificador, (, NOT ou [ esperado");
@@ -493,7 +498,7 @@ void Parser::statm()
             trataErro(": esperado");
     }
     //var identifier
-    if (isIdentifier(VAR_IDENTIFIER)) {
+    if (isIdentifier(varTable)) {
         getToken();
         infipo();
         if (type == OP_ASSIGN) {
@@ -504,7 +509,7 @@ void Parser::statm()
             trataErro(":= esperado");
     }
     //function identifier
-    else if (isIdentifier(FUNCTION_IDENTIFIER)) {
+    else if (isIdentifier(functionTable)) {
         getToken();
         if (type == OP_ASSIGN) {
             getToken();
@@ -514,12 +519,12 @@ void Parser::statm()
             trataErro(":= esperado");
     }
     //procedure identifier
-    else if (isIdentifier(PROCEDURE_IDENTIFIER)) {
+    else if (isIdentifier(procedureTable)) {
         getToken();
         if (type == SMB_OPEN_PARENT) {
             do {
                 getToken();
-                if (isIdentifier(PROCEDURE_IDENTIFIER))
+                if (isIdentifier(procedureTable))
                     getToken();
                 else
                     expr();
@@ -570,11 +575,11 @@ void Parser::statm()
         if (type == KW_OF) {
             do {
                 getToken();
-                if (type == LIT_STRING || isIdentifier(CONST_IDENTIFIER) || token.isNumber())
+                if (type == LIT_STRING || isIdentifier(constTable) || token.isNumber())
                     getToken();
                 else if (type == OP_PLUS || type == OP_MINUS) {
                     getToken();
-                    if (isIdentifier(CONST_IDENTIFIER) || token.isNumber()) 
+                    if (isIdentifier(constTable) || token.isNumber()) 
                         getToken();
                     else {
                         trataErro("constante esperada");
@@ -639,7 +644,7 @@ void Parser::statm()
     //for
     else if (type == KW_FOR) {
         getToken();
-        if (isIdentifier(VAR_IDENTIFIER)) { 
+        if (isIdentifier(varTable)) { 
             getToken();
             infipo();
             if (type == OP_ASSIGN) {
@@ -669,7 +674,7 @@ void Parser::statm()
     else if (type == KW_WITH) {
         do {
             getToken();
-            if (isIdentifier(VAR_IDENTIFIER)) {
+            if (isIdentifier(varTable)) {
                 getToken();
                 infipo();
                 //se este token for uma vírgula, continuará o laço
@@ -799,7 +804,7 @@ void Parser::block()
         if (token.isIdentifier()) {
             do {
 				//registra token na tabela
-				table.insert(pair<Token, TableRow>(token, TableRow(token, CONST_IDENTIFIER)));
+				constTable.insert(pair<string, ConstEntry>(tokenHash(), ConstEntry()));
                 getToken();
                 if (type == OP_EQUALS) {
                     getToken();
@@ -829,7 +834,7 @@ void Parser::block()
         if (token.isIdentifier()) {
             do {
 				//registra token na tabela
-				table.insert(pair<Token, TableRow>(token, TableRow(token, TYPE_IDENTIFIER)));
+				typeTable.insert(pair<string, TypeEntry>(tokenHash(), TypeEntry()));
                 getToken();
                 if (type == OP_EQUALS) {
                     getToken();
@@ -859,7 +864,7 @@ void Parser::block()
         if (token.isIdentifier()) {
             do {
 				 //registra token na tabela
-				table.insert(pair<Token, TableRow>(token, TableRow(token, VAR_IDENTIFIER)));
+				varTable.insert(pair<string, VarEntry>(tokenHash(), VarEntry()));
                 getToken();
                 if (type == SMB_COMMA)
                 {
@@ -878,7 +883,7 @@ void Parser::block()
 						trataErro("; esperado");
                 }
                 else
-					trataErro(": esperado");
+					trataErro(": ou , esperado");
             } while (token.isIdentifier());
         }
         else 
@@ -891,7 +896,7 @@ void Parser::block()
 			getToken();
 			if (token.isIdentifier()) {
 				//registra token na tabela
-				table.insert(pair<Token, TableRow>(token, TableRow(token, PROCEDURE_IDENTIFIER)));
+				procedureTable.insert(pair<string, ProcedureEntry>(tokenHash(), ProcedureEntry()));
 				
 				getToken();
 				palist();
@@ -914,7 +919,7 @@ void Parser::block()
 			getToken();
 			if (token.isIdentifier()) {
 				//registra token na tabela
-				table.insert(pair<Token, TableRow>(token, TableRow(token, FUNCTION_IDENTIFIER)));
+				functionTable.insert(pair<string, FunctionEntry>(tokenHash(), FunctionEntry()));
 				getToken();
 				palist();
 				if (type == SMB_COLON) {

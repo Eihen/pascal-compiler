@@ -2,17 +2,17 @@
 
 using namespace std;
 
-LexicalAnalyzer::LexicalAnalyzer(const char* fileName)
+LexicalAnalyzer::LexicalAnalyzer(ifstream* file)
 {
-	file.open(fileName);
 	cont_ident = IDENTIFIER;
+    analyze(file);
 }
 
-LexicalAnalyzer::LexicalAnalyzer(const char* fileName, TokenQueue* _tokenQueue)
+LexicalAnalyzer::LexicalAnalyzer(ifstream* file, TokenQueue* _tokenQueue)
 {
-	file.open(fileName);
 	cont_ident = IDENTIFIER;
 	tokenQueue = _tokenQueue;
+    analyze(file);
 }
 
 void LexicalAnalyzer::addToken(string value, int type, int line, int column)
@@ -26,12 +26,12 @@ void LexicalAnalyzer::addToken(string value, int type, int line, int column)
 	tokens.push_back(token);
 }
 
-void LexicalAnalyzer::analyze()
+void LexicalAnalyzer::analyze(ifstream* file)
 {
 	string line, word;
     char c, flag;
 	int lineNumber = 0;
-    while (getline(file, line)) {
+    while (getline(*file, line)) {
 		line += '\n';
 		lineNumber++;
         for (int i = 0, n = line.length(); i < n; i++) {
@@ -51,7 +51,22 @@ void LexicalAnalyzer::analyze()
 						
                     //leitura ponto flutuante
                     else if (c == '.') {
-						flag++;
+						//Simbolo SMB_DOUBLE_DOT (..) encontrado
+						if (word[word.length() - 1] == '.')
+						{
+							//Retira um do contador de . no número
+							flag--;
+
+							//Retira o último caracter da string (.)
+							word.pop_back();
+
+							//Retorna o contador para o caracter ponto anterior
+							i -= 2;
+
+							//Finaliza a leitura de números
+							break;
+						}
+                        flag++;
                         word += c;
                     }
 					
@@ -180,7 +195,7 @@ void LexicalAnalyzer::analyze()
 					
 					if (i == (n - 1)) //verifica se linha já foi finalizada e lê a próxima
 					{
-						if (getline(file, line)) {
+						if (getline(*file, line)) {
 							i = 0;
 							n = line.length();
 						}

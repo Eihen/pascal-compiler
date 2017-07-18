@@ -16,17 +16,16 @@ namespace std
 	class LexicalAnalyzer
 	{
 		public:
-			LexicalAnalyzer(const char* nomeArquivo);
-			LexicalAnalyzer(const char* nomeArquivo, TokenQueue* tokenQueue);
+			LexicalAnalyzer(ifstream* file);
+			LexicalAnalyzer(ifstream* file, TokenQueue* tokenQueue);
 			~LexicalAnalyzer();
-			void analyze();
 		private:
-			ifstream file;
 			list<Token> tokens;
 			map<string, int> identifiers;
 			int cont_ident;			//Conta os identificadores 
 			TokenQueue* tokenQueue = NULL;
 
+            void analyze(ifstream* file);
 			void addToken(string word, int type, int line, int column);
 			void showTable();
 			void generateFile();
