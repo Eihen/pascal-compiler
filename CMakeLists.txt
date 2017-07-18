@@ -8,20 +8,12 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/Debug)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-set(SOURCE_FILES
-        src/Helper.cpp
-        src/Helper.h
-        src/LexicalAnalyzer.cpp
-        src/LexicalAnalyzer.h
-        src/main.cpp
-        src/Parser.cpp
-        src/Parser.h
-        src/TableRow.cpp
-        src/TableRow.h
-        src/Token.cpp
-        src/Token.h
-        src/TokenQueue.cpp
-        src/TokenQueue.h)
+file(GLOB SOURCE_FILES
+        src/*.h
+        src/*.cpp
+        src/entry/*.h
+        src/entry/*.cpp
+)
 
 add_executable(pascal_compiler ${SOURCE_FILES})
 

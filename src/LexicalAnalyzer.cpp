@@ -51,7 +51,22 @@ void LexicalAnalyzer::analyze(ifstream* file)
 						
                     //leitura ponto flutuante
                     else if (c == '.') {
-						flag++;
+						//Simbolo SMB_DOUBLE_DOT (..) encontrado
+						if (word[word.length() - 1] == '.')
+						{
+							//Retira um do contador de . no número
+							flag--;
+
+							//Retira o último caracter da string (.)
+							word.pop_back();
+
+							//Retorna o contador para o caracter ponto anterior
+							i -= 2;
+
+							//Finaliza a leitura de números
+							break;
+						}
+                        flag++;
                         word += c;
                     }
 					
