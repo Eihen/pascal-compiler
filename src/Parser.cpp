@@ -72,11 +72,8 @@ void Parser::getToken()
 bool Parser::verify_and_get(bool condition)
 {
 	if(condition)
-	{
 		getToken();
-		return true;
-	}
-	return false;
+	return condition;
 }
 
 void Parser::constant()
@@ -98,7 +95,7 @@ void Parser::constant()
 
 void Parser::sitype()
 {
-	if(isIdentifier(TYPE_IDENTIFIER)) 
+	if(isIdentifier(TYPE_IDENTIFIER) || (type >= TYPE_INT && type <= TYPE_BOOLEAN)) 
 		getToken();
 	else {
         if(type == SMB_OPEN_PARENT) {
@@ -141,7 +138,7 @@ void Parser::aux_filist_p1()
 		if(type == OP_COLON)
 		{
 			getToken();
-			if(isIdentifier(TYPE_IDENTIFIER))
+			if(isIdentifier(TYPE_IDENTIFIER) || (type >= TYPE_INT && type <= TYPE_BOOLEAN))
 			{
 				getToken();
 				if(type == KW_OF)
@@ -157,7 +154,7 @@ void Parser::aux_filist_p1()
 			trataErro("Símbolo : esperado");
 	}
 	else
-		if(isIdentifier(TYPE_IDENTIFIER))
+		if(isIdentifier(TYPE_IDENTIFIER) || (type >= TYPE_INT && type <= TYPE_BOOLEAN))
 		{
 			getToken();
 			if(type == KW_OF)
@@ -307,7 +304,7 @@ void Parser::infipo()
 
 void Parser::factor()
 {
-	if (type == LIT_INT || type == LIT_FLOAT)
+	if (type == LIT_INT || type == LIT_FLOAT || type == KW_TRUE || type == KW_FALSE)
 	{
 		//ToDo 73
 		getToken();
@@ -409,11 +406,9 @@ void Parser::term()
 void Parser::siexpr()
 {
 	if (type == OP_PLUS || type == OP_MINUS)
-	{
 		getToken();
-		term();
-		//ToDo 152
-	}	
+	term();
+	//ToDo 152
 	while(type == OP_PLUS || type == OP_MINUS || type == KW_OR)
 	{
 		getToken();
@@ -444,7 +439,11 @@ void Parser::palist()
 				getToken();
 				do {
 					if (token.isIdentifier())
+					{
+						//registra token na tabela
+						table.insert(pair<Token, TableRow>(token, TableRow(token, VAR_IDENTIFIER)));
 						getToken();			
+					}
 					else
 						trataErro("Identificador esperado");
 				} while(type == SMB_COMMA);
@@ -455,15 +454,18 @@ void Parser::palist()
 					getToken();
 				do {
 					if (token.isIdentifier())
+					{
+						//registra token na tabela
+						table.insert(pair<Token, TableRow>(token, TableRow(token, VAR_IDENTIFIER)));
 						getToken();			
-					else
+					}else
 						trataErro("Identificador esperado");
-				} while(type == SMB_COMMA);
+				} while(verify_and_get (type == SMB_COMMA));
 				if(type == SMB_COLON)
 					getToken();
 				else
 					trataErro(": esperado");
-				if(isIdentifier(TYPE_IDENTIFIER))
+				if(isIdentifier(TYPE_IDENTIFIER) || (type >= TYPE_INT && type <= TYPE_BOOLEAN))
 					getToken();
 				else
 					trataErro("Identificador de tipo esperado");
@@ -485,7 +487,9 @@ void Parser::statm()
     //number
     if (token.isNumber()) {
         getToken();
-        if (type != SMB_COLON)
+        if (type == SMB_COLON)
+			getToken();
+		else
             trataErro(": esperado");
     }
     //var identifier
@@ -699,7 +703,7 @@ void Parser::read_type()
     if (type == SMB_AT) 
     {
 		getToken();
-		if(isIdentifier(TYPE_IDENTIFIER))
+		if(isIdentifier(TYPE_IDENTIFIER) || (type >= TYPE_INT && type <= TYPE_BOOLEAN))
 			getToken();
 		else
 			trataErro("Identificador de tipo esperado");
@@ -857,16 +861,11 @@ void Parser::block()
 				 //registra token na tabela
 				table.insert(pair<Token, TableRow>(token, TableRow(token, VAR_IDENTIFIER)));
                 getToken();
-                if (type == SMB_COMMA) {
+                if (type == SMB_COMMA)
+                {
                     getToken();
-                    if (token.isIdentifier()) //nesse ponto, identificador é obrigatório
-                    {
-						//registra token na tabela
-						table.insert(pair<Token, TableRow>(token, TableRow(token, VAR_IDENTIFIER)));
-						getToken();
-					}  
-					else
-                        trataErro("Identificador esperado");
+                    if(!token.isIdentifier())
+						trataErro("Identificador esperado");
                 }
                 else if (type == SMB_COLON) {
 					getToken();
@@ -942,7 +941,7 @@ void Parser::block()
 			else
 				trataErro("Identificador esperado");
 		}
-	}while(verify_and_get(type == SMB_SEMICOLON));
+	}while(type == KW_PROCEDURE || type == KW_FUNCTION);
     //BEGIN
     if (type == KW_BEGIN) {
         do {
