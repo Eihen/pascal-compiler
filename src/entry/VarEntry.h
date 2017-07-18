@@ -2,15 +2,19 @@
 #define VARENTRY_H
 
 #include "SymbolTableEntry.h"
+#include "../type/Type.h"
+#include "../Token.h"
 
-class VarEntry : SymbolTableEntry
+class VarEntry : public SymbolTableEntry
 {
 public:
-    VarEntry();
+    VarEntry(Token token);
+    void setType(Type type);
+    Type& getType();
     ~VarEntry();
     
 private:
-
+    Type varType;
 
 };
 

@@ -13,6 +13,8 @@ file(GLOB SOURCE_FILES
         src/*.cpp
         src/entry/*.h
         src/entry/*.cpp
+        src/type/*.h
+        src/type/*.cpp
 )
 
 add_executable(pascal_compiler ${SOURCE_FILES})

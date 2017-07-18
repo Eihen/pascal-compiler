@@ -2,11 +2,12 @@
 #define PROCEDUREENTRY_H
 
 #include "SymbolTableEntry.h"
+#include "../Token.h"
 
 class ProcedureEntry : SymbolTableEntry
 {
 public:
-    ProcedureEntry();
+    ProcedureEntry(Token token);
     ~ProcedureEntry();
 
 };

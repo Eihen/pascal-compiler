@@ -10,8 +10,14 @@
 #include "entry/FunctionEntry.h"
 #include "entry/ProcedureEntry.h"
 #include "entry/SymbolTableEntry.h"
+#include "type/ArrayType.h"
+#include "type/DimensionType.h"
+#include "type/FieldListType.h"
+#include "type/OfType.h"
+#include "type/Type.h"
 #include <map>
 #include <iostream>
+#include <list>
 
 namespace std
 {
@@ -37,8 +43,8 @@ namespace std
         string tokenHash();
         bool verify_and_get(bool condition);
 		void getToken();
-		void constant();
-		void sitype();
+		string constant();
+		Type& sitype();
 		//Auxiliar para filist
 		void aux_filist_p1();
 		void aux_filist_p2();
@@ -51,7 +57,7 @@ namespace std
 		void expr();
 		void palist();
 		void statm();
-		void read_type();
+		Type& read_type();
 		void block();
 		void progrm();
 		void trataErro(string message);

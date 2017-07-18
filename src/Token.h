@@ -66,15 +66,6 @@ namespace std
 			bool isType();
             bool isNumber();
 	};
-
-	//ToDo tirar isso quando não precisar mais
-	template<> struct less<Token>
-	{
-		bool operator() (const Token& lhs, const Token& rhs) const
-		{
-			return lhs.value < rhs.value;
-		}
-	};
 }
 
 #endif // BASETOKEN_H

@@ -1,6 +1,6 @@
 #include "ProcedureEntry.h"
 
-ProcedureEntry::ProcedureEntry()
+ProcedureEntry::ProcedureEntry(Token token) : SymbolTableEntry(token)
 {
 }
 

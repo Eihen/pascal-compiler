@@ -1,6 +1,6 @@
 #include "ConstEntry.h"
 
-ConstEntry::ConstEntry()
+ConstEntry::ConstEntry(Token token) : SymbolTableEntry(token)
 {
 }
 

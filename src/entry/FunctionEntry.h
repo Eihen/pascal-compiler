@@ -2,11 +2,12 @@
 #define FUNCTIONENTRY_H
 
 #include "ProcedureEntry.h"
+#include "../Token.h"
 
 class FunctionEntry : ProcedureEntry
 {
 public:
-    FunctionEntry();
+    FunctionEntry(Token token);
     ~FunctionEntry();
 
 };

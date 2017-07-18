@@ -1,7 +1,10 @@
 #include "SymbolTableEntry.h"
 
-SymbolTableEntry::SymbolTableEntry()
+SymbolTableEntry::SymbolTableEntry(Token token)
 {
+    setIdentifier(token.getValue());
+    setReferenced(false);
+    setScope(0);
 }
 
 void SymbolTableEntry::setIdentifier(const string& identifier)

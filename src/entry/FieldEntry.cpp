@@ -1,6 +1,6 @@
 #include "FieldEntry.h"
 
-FieldEntry::FieldEntry()
+FieldEntry::FieldEntry(Token token) : SymbolTableEntry(token)
 {
 }
 

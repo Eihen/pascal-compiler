@@ -2,11 +2,12 @@
 #define FIELDENTRY_H
 
 #include "SymbolTableEntry.h"
+#include "../Token.h"
 
 class FieldEntry : SymbolTableEntry
 {
 public:
-    FieldEntry();
+    FieldEntry(Token token);
     ~FieldEntry();
 
 };

@@ -2,13 +2,14 @@
 #define SYMBOLTABLEENTRY_H
 
 #include <string>
+#include "../Token.h"
 
 using namespace std;
 
 class SymbolTableEntry
 {
 public:
-    SymbolTableEntry();
+    SymbolTableEntry(Token token);
     void setIdentifier(const string& identifier);
     void setReferenced(bool referenced);
     void setScope(int scope);
@@ -16,7 +17,7 @@ public:
     const string& getIdentifier() const;
     bool isReferenced() const;
     int getScope() const;
-    ~SymbolTableEntry();
+    virtual ~SymbolTableEntry();
 
 private:
     string identifier;
