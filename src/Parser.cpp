@@ -12,12 +12,12 @@ Parser::Parser(TokenQueue* _tokenQueue)
 	}
 	catch(int e)
 	{
-		trataErro("Fim do programa não encontrado");
+		trataErro("Fim do programa nao encontrado");
 	}
 
 	//Verifica se existem erros na compilação do programa, em caso positivo exibe os erros
 	if(errorQueue.empty())
-		cout << "Compilação terminada com sucessso" << endl;
+		cout << "Compilacao terminada com sucessso" << endl;
 	else
 		while(!errorQueue.empty())
 		{
@@ -47,11 +47,11 @@ Parser::Parser(TokenQueue* _tokenQueue)
             cout << "Procedimento " << mapPair.second.getIdentifier() << " nao utilizado." << endl;
 }
 
-template<class T> bool Parser::isIdentifier(map<string, T> table, int scope)
+template<class T> bool Parser::isIdentifier(map<string, T&> table, int scope)
 {
     if (token.isIdentifier())
     {
-        typename map<string, T>::iterator it = table.find(tokenHash(scope));
+        typename map<string, T&>::iterator it = table.find(tokenHash(scope));
         if (it != table.end())
         {
             it->second.setReferenced(true);
@@ -61,7 +61,7 @@ template<class T> bool Parser::isIdentifier(map<string, T> table, int scope)
     return false;
 }
 
-template<class T> bool Parser::isIdentifier(map<string, T> table)
+template<class T> bool Parser::isIdentifier(map<string, T&> table)
 {
     return isIdentifier(table, currentScope) || isIdentifier(table, 0);
 }
@@ -298,7 +298,7 @@ void Parser::filist()
 	if(token.isIdentifier())
 	{
         //registra token na tabela
-        fieldTable.insert(pair<string, FieldEntry&>(tokenHash(), * new FieldEntry(token)));
+        insertSymbol(&fieldTable, * new FieldEntry(token), "Campo " + token.getValue() + " redeclarado");
 		getToken();
 		if(type == SMB_COMMA)
 		{
@@ -509,9 +509,9 @@ list<SymbolTableEntry> Parser::palist()
 					if (token.isIdentifier())
 					{
 						ProcedureEntry& procedureEntry = * new ProcedureEntry(token, currentScope);
-						entries.push_back(procedureEntry);
 						//registra token na tabela
-						procedureTable.insert(pair<string, ProcedureEntry&>(tokenHash(), procedureEntry));
+                        if (insertSymbol(&procedureTable, procedureEntry, "Procedure " + token.getValue() + " redeclarada", 0))
+                            entries.push_back(procedureEntry);
 						getToken();
 					}
 					else
@@ -526,10 +526,9 @@ list<SymbolTableEntry> Parser::palist()
 				do {
 					if (token.isIdentifier())
 					{
-						VarEntry& varEntry = * new VarEntry(token, currentScope);
-						vars.push_back(varEntry);
-						//registra token na tabela
-						varTable.insert(pair<string, VarEntry&>(tokenHash(), varEntry));
+                        VarEntry& varEntry = * new VarEntry(token, currentScope);
+                        if (insertSymbol(&varTable, varEntry, "Variavel " + token.getValue() + " redeclarada"))
+                            vars.push_back(varEntry);
 						getToken();
 					}else
 						trataErro("Identificador esperado");
@@ -911,7 +910,7 @@ void Parser::block()
         if (token.isIdentifier()) {
             do {
 				//registra token na tabela
-				constTable.insert(pair<string, ConstEntry&>(tokenHash(), * new ConstEntry(token, currentScope)));
+                insertSymbol(&constTable, * new ConstEntry(token, currentScope), "Constante " + token.getValue() + " redeclarada");
                 getToken();
                 if (type == OP_EQUALS) {
                     getToken();
@@ -941,7 +940,7 @@ void Parser::block()
         if (token.isIdentifier()) {
             do {
 				//registra token na tabela
-				typeTable.insert(pair<string, TypeEntry&>(tokenHash(), * new TypeEntry(token, currentScope)));
+                insertSymbol(&typeTable, * new TypeEntry(token, currentScope), "Tipo " + token.getValue() + " redeclarado");
                 getToken();
                 if (type == OP_EQUALS) {
                     getToken();
@@ -972,10 +971,9 @@ void Parser::block()
             list<VarEntry> variables;
             Type& varType = * new Type();
             do {
-				 //registra token na tabela
-				VarEntry& entry = * new VarEntry(token, currentScope);
-                variables.push_back(entry);
-				varTable.insert(pair<string, VarEntry&>(tokenHash(), entry));
+                VarEntry& entry = * new VarEntry(token, currentScope);
+                if (insertSymbol(&varTable, entry, "Variavel " + token.getValue() + " redeclarada"))
+                    variables.push_back(entry);
                 getToken();
                 if (type == SMB_COMMA)
                 {
@@ -1015,7 +1013,7 @@ void Parser::block()
                 currentScope = previousScope + 1;
 				//registra token na tabela
 				ProcedureEntry& procedureEntry = * new ProcedureEntry(token, currentScope);
-				procedureTable.insert(pair<string, ProcedureEntry&>(tokenHash(0), procedureEntry));
+                insertSymbol(&procedureTable, procedureEntry, "Procedure " + token.getValue() + " redeclarada", 0);
 
 				getToken();
 				list<SymbolTableEntry> params = palist();
@@ -1043,7 +1041,7 @@ void Parser::block()
                 currentScope = previousScope + 1;
 				//registra token na tabela
 				FunctionEntry& functionEntry = * new FunctionEntry(token, currentScope);
-				functionTable.insert(pair<string, FunctionEntry&>(tokenHash(0), functionEntry));
+                insertSymbol(&functionTable, functionEntry, "Funcao " + token.getValue() + " redeclarada", 0);
 				getToken();
 				list<SymbolTableEntry> params = palist();
 				functionEntry.setParams(params);
@@ -1139,10 +1137,32 @@ void Parser::progrm()
 
 void Parser::trataErro(string message)
 {
-    message += " (linha: " + to_string(token.getLine()) + ", coluna: " + to_string(token.getColumn()) + ")";
+    message += " (linha: " + to_string(token.getLine()) + ", coluna: " + to_string(token.getColumn()) + ") ";
     errorQueue.push(message);
 }
 
 Parser::~Parser()
 {
+}
+
+template<class T>
+bool Parser::insertSymbol(map<string, T&>* table, T& item, string errorMessage)
+{
+    return insertSymbol(table, item, errorMessage, currentScope);
+}
+
+template<class T>
+bool Parser::insertSymbol(map<string, T&>* table,  T& item, string errorMessage, int scope)
+{
+    auto hash = tokenHash(scope);
+    if (table->find(hash) == table->end())
+    {
+        table->insert(pair<string, T&>(hash, item));
+        return true;
+    }
+    else
+    {
+        trataErro(errorMessage);
+        return false;
+    }
 }

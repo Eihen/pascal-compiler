@@ -41,8 +41,10 @@ namespace std
 		TokenQueue* tokenQueue = NULL;
 		std::queue<string> errorQueue;
 
-        template<class T> bool isIdentifier(map<string, T> table, int scope);
-        template<class T> bool isIdentifier(map<string, T> table);
+        template<class T> bool isIdentifier(map<string, T&> table, int scope);
+        template<class T> bool isIdentifier(map<string, T&> table);
+		template<class T> bool insertSymbol(map<string, T&>* table, T& item, string errorMessage, int scope);
+        template<class T> bool insertSymbol(map<string, T&>* table, T& item, string errorMessage);
         Type& currentTokenType();
         string tokenHash(int scope);
         string tokenHash();
