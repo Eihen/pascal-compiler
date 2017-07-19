@@ -30,12 +30,12 @@ namespace std
 	private:
 		Token token;
 		int type;
-        map<string, VarEntry> varTable;
-        map<string, ConstEntry> constTable;
-        map<string, TypeEntry> typeTable;
-        map<string, FieldEntry> fieldTable;
-        map<string, FunctionEntry> functionTable;
-        map<string, ProcedureEntry> procedureTable;
+        map<string, VarEntry&> varTable;
+        map<string, ConstEntry&> constTable;
+        map<string, TypeEntry&> typeTable;
+        map<string, FieldEntry&> fieldTable;
+        map<string, FunctionEntry&> functionTable;
+        map<string, ProcedureEntry&> procedureTable;
 		TokenQueue* tokenQueue = NULL;
 		std::queue<string> errorQueue;
 

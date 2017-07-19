@@ -4,7 +4,7 @@
 #include "SymbolTableEntry.h"
 #include "../Token.h"
 
-class ConstEntry : SymbolTableEntry
+class ConstEntry : public SymbolTableEntry
 {
 public:
     ConstEntry(Token token);

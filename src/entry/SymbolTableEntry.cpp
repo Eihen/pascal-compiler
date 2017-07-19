@@ -27,12 +27,12 @@ const string& SymbolTableEntry::getIdentifier() const
     return identifier;
 }
 
-bool SymbolTableEntry::isReferenced() const
+bool SymbolTableEntry::isReferenced()
 {
     return referenced;
 }
 
-int SymbolTableEntry::getScope() const
+int SymbolTableEntry::getScope()
 {
     return scope;
 }

@@ -4,7 +4,7 @@
 #include "ProcedureEntry.h"
 #include "../Token.h"
 
-class FunctionEntry : ProcedureEntry
+class FunctionEntry : public ProcedureEntry
 {
 public:
     FunctionEntry(Token token);

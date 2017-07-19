@@ -4,7 +4,7 @@
 #include "SymbolTableEntry.h"
 #include "../Token.h"
 
-class ProcedureEntry : SymbolTableEntry
+class ProcedureEntry : public SymbolTableEntry
 {
 public:
     ProcedureEntry(Token token);

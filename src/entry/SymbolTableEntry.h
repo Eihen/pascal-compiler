@@ -15,8 +15,8 @@ public:
     void setScope(int scope);
     
     const string& getIdentifier() const;
-    bool isReferenced() const;
-    int getScope() const;
+    bool isReferenced();
+    int getScope();
     virtual ~SymbolTableEntry();
 
 private:

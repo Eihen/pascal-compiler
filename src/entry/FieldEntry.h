@@ -4,7 +4,7 @@
 #include "SymbolTableEntry.h"
 #include "../Token.h"
 
-class FieldEntry : SymbolTableEntry
+class FieldEntry : public SymbolTableEntry
 {
 public:
     FieldEntry(Token token);
