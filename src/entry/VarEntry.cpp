@@ -1,6 +1,6 @@
 #include "VarEntry.h"
 
-VarEntry::VarEntry(Token token) : SymbolTableEntry(token), varType(0)
+VarEntry::VarEntry(Token token, int scope) : SymbolTableEntry(token, scope), varType(0)
 {
 }
 

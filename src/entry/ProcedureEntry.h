@@ -7,7 +7,7 @@
 class ProcedureEntry : public SymbolTableEntry
 {
 public:
-    ProcedureEntry(Token token);
+    ProcedureEntry(Token token, int scope);
     ~ProcedureEntry();
 
 };

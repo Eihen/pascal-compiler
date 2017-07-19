@@ -8,7 +8,7 @@
 class VarEntry : public SymbolTableEntry
 {
 public:
-    VarEntry(Token token);
+    VarEntry(Token token, int scope);
     void setType(Type type);
     Type& getType();
     ~VarEntry();

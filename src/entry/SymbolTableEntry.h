@@ -10,6 +10,7 @@ class SymbolTableEntry
 {
 public:
     SymbolTableEntry(Token token);
+    SymbolTableEntry(Token token, int scope);
     void setIdentifier(const string& identifier);
     void setReferenced(bool referenced);
     void setScope(int scope);

@@ -30,6 +30,8 @@ namespace std
 	private:
 		Token token;
 		int type;
+        int previousScope = 0;
+		int currentScope = 0;
         map<string, VarEntry&> varTable;
         map<string, ConstEntry&> constTable;
         map<string, TypeEntry&> typeTable;
@@ -39,7 +41,10 @@ namespace std
 		TokenQueue* tokenQueue = NULL;
 		std::queue<string> errorQueue;
 
+        template<class T> bool isIdentifier(map<string, T> table, int scope);
         template<class T> bool isIdentifier(map<string, T> table);
+
+        string tokenHash(int scope);
         string tokenHash();
         bool verify_and_get(bool condition);
 		void getToken();

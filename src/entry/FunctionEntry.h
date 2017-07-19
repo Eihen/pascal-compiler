@@ -7,7 +7,7 @@
 class FunctionEntry : public ProcedureEntry
 {
 public:
-    FunctionEntry(Token token);
+    FunctionEntry(Token token, int scope);
     ~FunctionEntry();
 
 };

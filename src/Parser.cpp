@@ -26,32 +26,32 @@ Parser::Parser(TokenQueue* _tokenQueue)
 		}
 
     //warnings
-    for (pair<string, VarEntry&> var : varTable)
-        if (!var.second.isReferenced())
-            cout << "Variavel " << var.second.getIdentifier() << " nao utilizada." << endl;
+    for (pair<string, VarEntry&> mapPair : varTable)
+        if (!mapPair.second.isReferenced())
+            cout << "Variavel " << mapPair.second.getIdentifier() << " nao utilizada." << endl;
 
-    for (pair<string, ConstEntry&> var : constTable)
-        if (!var.second.isReferenced())
-            cout << "Constante " << var.second.getIdentifier() << " nao utilizada." << endl;
+    for (pair<string, ConstEntry&> mapPair : constTable)
+        if (!mapPair.second.isReferenced())
+            cout << "Constante " << mapPair.second.getIdentifier() << " nao utilizada." << endl;
 
-    for (pair<string, TypeEntry&> var : typeTable)
-        if (!var.second.isReferenced())
-            cout << "Tipo " << var.second.getIdentifier() << " nao utilizado." << endl;
+    for (pair<string, TypeEntry&> mapPair : typeTable)
+        if (!mapPair.second.isReferenced())
+            cout << "Tipo " << mapPair.second.getIdentifier() << " nao utilizado." << endl;
 
-    for (pair<string, FunctionEntry&> var : functionTable)
-        if (!var.second.isReferenced())
-            cout << "Função " << var.second.getIdentifier() << " nao utilizada." << endl;
+    for (pair<string, FunctionEntry&> mapPair : functionTable)
+        if (!mapPair.second.isReferenced())
+            cout << "Função " << mapPair.second.getIdentifier() << " nao utilizada." << endl;
 
-    for (pair<string, ProcedureEntry&> var : procedureTable)
-        if (!var.second.isReferenced())
-            cout << "Procedimento " << var.second.getIdentifier() << " nao utilizado." << endl;
+    for (pair<string, ProcedureEntry&> mapPair : procedureTable)
+        if (!mapPair.second.isReferenced())
+            cout << "Procedimento " << mapPair.second.getIdentifier() << " nao utilizado." << endl;
 }
 
-template<class T> bool Parser::isIdentifier(map<string, T> table)
+template<class T> bool Parser::isIdentifier(map<string, T> table, int scope)
 {
     if (token.isIdentifier())
     {
-        typename map<string, T>::iterator it = table.find(tokenHash());
+        typename map<string, T>::iterator it = table.find(tokenHash(scope));
         if (it != table.end())
         {
             it->second.setReferenced(true);
@@ -61,9 +61,19 @@ template<class T> bool Parser::isIdentifier(map<string, T> table)
     return false;
 }
 
+template<class T> bool Parser::isIdentifier(map<string, T> table)
+{
+    return isIdentifier(table, currentScope) || isIdentifier(table, 0);
+}
+
+string Parser::tokenHash(int scope)
+{
+	return token.getValue() + "|" + to_string(scope);
+}
+
 string Parser::tokenHash()
 {
-    return token.getValue();
+	return tokenHash(currentScope);
 }
 
 void Parser::getToken()
@@ -135,15 +145,18 @@ Type& Parser::sitype()
 {
 	if(isIdentifier(typeTable))
     {
-        TypeEntry typeEntry = typeTable.find(tokenHash())->second;
+		auto it = typeTable.find(tokenHash());
+		if (it == typeTable.end())
+			it = typeTable.find(tokenHash(0));
+        TypeEntry typeEntry = it->second;
         getToken();
         return * new Type(typeEntry.getCode());
     }
     else if (type >= TYPE_INT && type <= TYPE_BOOLEAN)
     {
-        int sittype = type;
+        int sitype = type;
         getToken();
-        return * new Type(sittype);
+        return * new Type(sitype);
     }
 	else {
         if(type == SMB_OPEN_PARENT) {
@@ -369,7 +382,7 @@ void Parser::factor()
 		infipo();
 		//ToDo 167
 	}
-	else if (isIdentifier(functionTable))
+	else if (isIdentifier(functionTable, 0))
 	{
 		//ToDo 77
 		getToken();
@@ -489,7 +502,7 @@ void Parser::palist()
 					if (token.isIdentifier())
 					{
 						//registra token na tabela
-						procedureTable.insert(pair<string, ProcedureEntry&>(tokenHash(), * new ProcedureEntry(token)));
+						procedureTable.insert(pair<string, ProcedureEntry&>(tokenHash(), * new ProcedureEntry(token, currentScope)));
 						getToken();
 					}
 					else
@@ -504,7 +517,7 @@ void Parser::palist()
 					if (token.isIdentifier())
 					{
 						//registra token na tabela
-						varTable.insert(pair<string, VarEntry&>(tokenHash(), * new VarEntry(token)));
+						varTable.insert(pair<string, VarEntry&>(tokenHash(), * new VarEntry(token, currentScope)));
 						getToken();
 					}else
 						trataErro("Identificador esperado");
@@ -552,7 +565,7 @@ void Parser::statm()
             trataErro(":= esperado");
     }
     //function identifier
-    else if (isIdentifier(functionTable)) {
+    else if (isIdentifier(functionTable, 0)) {
         getToken();
         if (type == OP_ASSIGN) {
             getToken();
@@ -562,12 +575,12 @@ void Parser::statm()
             trataErro(":= esperado");
     }
     //procedure identifier
-    else if (isIdentifier(procedureTable)) {
+    else if (isIdentifier(procedureTable, 0)) {
         getToken();
         if (type == SMB_OPEN_PARENT) {
             do {
                 getToken();
-                if (isIdentifier(procedureTable))
+                if (isIdentifier(procedureTable, 0))
                     getToken();
                 else
                     expr();
@@ -753,7 +766,10 @@ Type& Parser::read_type()
 		getToken();
 		if(isIdentifier(typeTable) || (type >= TYPE_INT && type <= TYPE_BOOLEAN))
         {
-            TypeEntry typeEntry = typeTable.find(tokenHash())->second;
+			auto it = typeTable.find(tokenHash());
+			if (it == typeTable.end())
+				it = typeTable.find(tokenHash(0));
+            TypeEntry typeEntry = it->second;
             getToken();
             return * new Type(typeEntry.getCode());
         }
@@ -861,7 +877,7 @@ void Parser::block()
         if (token.isIdentifier()) {
             do {
 				//registra token na tabela
-				constTable.insert(pair<string, ConstEntry&>(tokenHash(), * new ConstEntry(token)));
+				constTable.insert(pair<string, ConstEntry&>(tokenHash(), * new ConstEntry(token, currentScope)));
                 getToken();
                 if (type == OP_EQUALS) {
                     getToken();
@@ -891,7 +907,7 @@ void Parser::block()
         if (token.isIdentifier()) {
             do {
 				//registra token na tabela
-				typeTable.insert(pair<string, TypeEntry&>(tokenHash(), * new TypeEntry(token)));
+				typeTable.insert(pair<string, TypeEntry&>(tokenHash(), * new TypeEntry(token, currentScope)));
                 getToken();
                 if (type == OP_EQUALS) {
                     getToken();
@@ -923,8 +939,7 @@ void Parser::block()
             Type& varType = * new Type();
             do {
 				 //registra token na tabela
-				VarEntry& entry = * new VarEntry(token);
-                //TODO set scope
+				VarEntry& entry = * new VarEntry(token, currentScope);
                 variables.push_back(entry);
 				varTable.insert(pair<string, VarEntry&>(tokenHash(), entry));
                 getToken();
@@ -963,8 +978,9 @@ void Parser::block()
 		if (type == KW_PROCEDURE) {
 			getToken();
 			if (token.isIdentifier()) {
+                currentScope = previousScope + 1;
 				//registra token na tabela
-				procedureTable.insert(pair<string, ProcedureEntry&>(tokenHash(), * new ProcedureEntry(token)));
+				procedureTable.insert(pair<string, ProcedureEntry&>(tokenHash(0), * new ProcedureEntry(token, currentScope)));
 
 				getToken();
 				palist();
@@ -978,6 +994,8 @@ void Parser::block()
 				}
 				else
 					trataErro("Ponto e vírgula esperado");
+                previousScope = currentScope;
+                currentScope = 0;
 			}
 			else
 				trataErro("Identificador esperado");
@@ -986,8 +1004,9 @@ void Parser::block()
 		if (type == KW_FUNCTION) {
 			getToken();
 			if (token.isIdentifier()) {
+                currentScope = previousScope + 1;
 				//registra token na tabela
-				functionTable.insert(pair<string, FunctionEntry&>(tokenHash(), * new FunctionEntry(token)));
+				functionTable.insert(pair<string, FunctionEntry&>(tokenHash(0), * new FunctionEntry(token, currentScope)));
 				getToken();
 				palist();
 				if (type == SMB_COLON) {
@@ -1013,6 +1032,8 @@ void Parser::block()
 			}
 			else
 				trataErro("Identificador esperado");
+            previousScope = currentScope;
+            currentScope = 0;
 		}
 	}while(type == KW_PROCEDURE || type == KW_FUNCTION);
     //BEGIN

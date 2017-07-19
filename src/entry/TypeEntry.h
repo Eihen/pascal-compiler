@@ -7,7 +7,7 @@
 class TypeEntry : public SymbolTableEntry
 {
 public:
-    TypeEntry(Token token);
+    TypeEntry(Token token, int scope);
     int getCode();
     ~TypeEntry();
 private:
