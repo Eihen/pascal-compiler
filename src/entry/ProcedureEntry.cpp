@@ -8,3 +8,13 @@ ProcedureEntry::~ProcedureEntry()
 {
 }
 
+void ProcedureEntry::setParams(list <SymbolTableEntry> params)
+{
+    this->params = params;
+}
+
+list <SymbolTableEntry> ProcedureEntry::getParams()
+{
+    return params;
+}
+

@@ -66,6 +66,15 @@ template<class T> bool Parser::isIdentifier(map<string, T> table)
     return isIdentifier(table, currentScope) || isIdentifier(table, 0);
 }
 
+Type& Parser::currentTokenType()
+{
+	auto it = typeTable.find(tokenHash());
+	if (it == typeTable.end())
+		it = typeTable.find(tokenHash(0));
+	TypeEntry typeEntry = it->second;
+	return * new Type(typeEntry.getCode());
+}
+
 string Parser::tokenHash(int scope)
 {
 	return token.getValue() + "|" + to_string(scope);
@@ -145,12 +154,9 @@ Type& Parser::sitype()
 {
 	if(isIdentifier(typeTable))
     {
-		auto it = typeTable.find(tokenHash());
-		if (it == typeTable.end())
-			it = typeTable.find(tokenHash(0));
-        TypeEntry typeEntry = it->second;
+		Type& type = currentTokenType();
         getToken();
-        return * new Type(typeEntry.getCode());
+        return type;
     }
     else if (type >= TYPE_INT && type <= TYPE_BOOLEAN)
     {
@@ -489,8 +495,9 @@ void Parser::expr()
 	}
 }
 
-void Parser::palist()
+list<SymbolTableEntry> Parser::palist()
 {
+	list<SymbolTableEntry> entries;
 	if (type == SMB_OPEN_PARENT)
 	{
 		do {
@@ -501,8 +508,10 @@ void Parser::palist()
 				do {
 					if (token.isIdentifier())
 					{
+						ProcedureEntry& procedureEntry = * new ProcedureEntry(token, currentScope);
+						entries.push_back(procedureEntry);
 						//registra token na tabela
-						procedureTable.insert(pair<string, ProcedureEntry&>(tokenHash(), * new ProcedureEntry(token, currentScope)));
+						procedureTable.insert(pair<string, ProcedureEntry&>(tokenHash(), procedureEntry));
 						getToken();
 					}
 					else
@@ -511,13 +520,16 @@ void Parser::palist()
 			}
 			else if (type == KW_FUNCTION || type == KW_VAR || token.isIdentifier())
 			{
+				list<VarEntry> vars;
 				if(type == KW_FUNCTION || type == KW_VAR)
 					getToken();
 				do {
 					if (token.isIdentifier())
 					{
+						VarEntry& varEntry = * new VarEntry(token, currentScope);
+						vars.push_back(varEntry);
 						//registra token na tabela
-						varTable.insert(pair<string, VarEntry&>(tokenHash(), * new VarEntry(token, currentScope)));
+						varTable.insert(pair<string, VarEntry&>(tokenHash(), varEntry));
 						getToken();
 					}else
 						trataErro("Identificador esperado");
@@ -526,8 +538,26 @@ void Parser::palist()
 					getToken();
 				else
 					trataErro(": esperado");
-				if(isIdentifier(typeTable) || (type >= TYPE_INT && type <= TYPE_BOOLEAN))
+				if(isIdentifier(typeTable))
+				{
+					Type& type = currentTokenType();
+					for (VarEntry var : vars)
+					{
+						var.setType(type);
+						entries.push_back(var);
+					}
 					getToken();
+				}
+                else if (type >= TYPE_INT && type <= TYPE_BOOLEAN)
+                {
+                    Type& type = * new Type(this->type);
+                    for (VarEntry var : vars)
+                    {
+                        var.setType(type);
+                        entries.push_back(var);
+                    }
+                    getToken();
+                }
 				else
 					trataErro("Identificador de tipo esperado");
 			}
@@ -536,11 +566,12 @@ void Parser::palist()
 			if (type == SMB_CLOSE_PARENT)
 			{
 				getToken();
-				return;
+				return entries;
 			}
 		} while(type == SMB_SEMICOLON);
 		trataErro("Símbolo ; ou ) esperado");
 	}
+	return entries;
 }
 
 void Parser::statm()
@@ -764,14 +795,17 @@ Type& Parser::read_type()
     if (type == SMB_AT)
     {
 		getToken();
-		if(isIdentifier(typeTable) || (type >= TYPE_INT && type <= TYPE_BOOLEAN))
+		if(isIdentifier(typeTable))
         {
-			auto it = typeTable.find(tokenHash());
-			if (it == typeTable.end())
-				it = typeTable.find(tokenHash(0));
-            TypeEntry typeEntry = it->second;
+			Type& type = currentTokenType();
             getToken();
-            return * new Type(typeEntry.getCode());
+            return type;
+        }
+        else if (type >= TYPE_INT && type <= TYPE_BOOLEAN)
+        {
+            int sitype = type;
+            getToken();
+            return * new Type(sitype);
         }
 		else
 			trataErro("Identificador de tipo esperado");
@@ -980,10 +1014,12 @@ void Parser::block()
 			if (token.isIdentifier()) {
                 currentScope = previousScope + 1;
 				//registra token na tabela
-				procedureTable.insert(pair<string, ProcedureEntry&>(tokenHash(0), * new ProcedureEntry(token, currentScope)));
+				ProcedureEntry& procedureEntry = * new ProcedureEntry(token, currentScope);
+				procedureTable.insert(pair<string, ProcedureEntry&>(tokenHash(0), procedureEntry));
 
 				getToken();
-				palist();
+				list<SymbolTableEntry> params = palist();
+				procedureEntry.setParams(params);
 				if (type == SMB_SEMICOLON) {
 					getToken();
 					block();
@@ -1006,9 +1042,11 @@ void Parser::block()
 			if (token.isIdentifier()) {
                 currentScope = previousScope + 1;
 				//registra token na tabela
-				functionTable.insert(pair<string, FunctionEntry&>(tokenHash(0), * new FunctionEntry(token, currentScope)));
+				FunctionEntry& functionEntry = * new FunctionEntry(token, currentScope);
+				functionTable.insert(pair<string, FunctionEntry&>(tokenHash(0), functionEntry));
 				getToken();
-				palist();
+				list<SymbolTableEntry> params = palist();
+				functionEntry.setParams(params);
 				if (type == SMB_COLON) {
 					getToken();
 					if (token.isType()) {

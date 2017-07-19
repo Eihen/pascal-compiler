@@ -43,7 +43,7 @@ namespace std
 
         template<class T> bool isIdentifier(map<string, T> table, int scope);
         template<class T> bool isIdentifier(map<string, T> table);
-
+        Type& currentTokenType();
         string tokenHash(int scope);
         string tokenHash();
         bool verify_and_get(bool condition);
@@ -60,7 +60,7 @@ namespace std
 		void term();
 		void siexpr();
 		void expr();
-		void palist();
+		list<SymbolTableEntry> palist();
 		void statm();
 		Type& read_type();
 		void block();
