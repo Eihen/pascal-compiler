@@ -200,4 +200,7 @@ void CodeGenerator::endWhile(int whileNumber)
     mepaFile << "WHILE" << whileNumber << ":\n";
 }
 
-
+void CodeGenerator::goTo(string labelNumber)
+{
+    mepaFile << "\t DSVS LABEL" << labelNumber << "\n";
+}

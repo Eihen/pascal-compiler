@@ -854,7 +854,10 @@ void Parser::statm()
     else if (type == KW_GOTO) {
         getToken();
         if (type == LIT_INT)
-			getToken();
+        {
+            codeGenerator.goTo(token.getValue());
+            getToken();
+        }
 		else
             trataErro("Número inteiro esperado");
     }

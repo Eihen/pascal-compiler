@@ -40,6 +40,7 @@ namespace std
         int startWhile();
         void evaluateWhile(int whileNumber);
         void endWhile(int whileNumber);
+        void goTo(string labelNumber);
 
     private:
 		ofstream mepaFile;
