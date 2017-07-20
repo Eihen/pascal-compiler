@@ -132,6 +132,14 @@ A geração de código também é feita ad hoc, com auxílio do grafo sintático
 auxílio da classe CodeGenerator. Conforme orientado pelo professor, fizemos a geração
 de código apenas para a rotina principal, embora a análise léxica, sintática e
 semântica consiga avaliar qualquer código em pascal.
+Foi implementada a geração de código para:
+    Alocação de memória para variáveis;
+    Desalocação de memória de variáveis ao sair do contexto;
+    Avaliação de expressões com os operadores =, <>, <, >, <=, >=, +, -, /, *, and, or, not, inversão de valor;
+    Acesso a variáveis normais e arrays multi-dimensionais;
+    Atribuições;
+    Comando GOTO;
+    Estruturas if e while.
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!  Arquivos de exemplo  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
