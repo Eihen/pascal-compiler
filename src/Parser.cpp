@@ -1066,8 +1066,8 @@ void Parser::block()
                     if (type == SMB_SEMICOLON) {
                         getToken();
 
-                        usedMemory = variables.size();
-                        codeGenerator.allocMemory(usedMemory);
+                        usedMemory += variables.size();
+                        codeGenerator.allocMemory(variables.size());
 
                         //define o tipo das variáveis listadas
                         for (VarEntry varEntry : variables) {
