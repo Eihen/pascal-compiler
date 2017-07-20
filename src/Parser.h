@@ -15,6 +15,7 @@
 #include "type/FieldListType.h"
 #include "type/OfType.h"
 #include "type/Type.h"
+#include "CodeGenerator.h"
 #include <map>
 #include <iostream>
 #include <list>
@@ -40,6 +41,7 @@ namespace std
         map<string, ProcedureEntry&> procedureTable;
 		TokenQueue* tokenQueue = NULL;
 		std::queue<string> errorQueue;
+        CodeGenerator codeGenerator;
 
         template<class T> bool isIdentifier(map<string, T&> table, int scope);
         template<class T> bool isIdentifier(map<string, T&> table);
