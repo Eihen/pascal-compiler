@@ -1,0 +1,152 @@
+Projeto: Compilador para a lingugem Pascal------------------------------------------
+------------------------------------------------------------------------------------
+
+Integrantes do grupo:
+Emerson Belancieri de Souza	RA: 151021971
+João Pedro Mucheroni Covolan	RA: 151022593
+Lucas Fernandes Nogueira	RA: 151022658
+
+Linguagem de programção utilizada---------------------------------------------------
+------------------------------------------------------------------------------------
+A linguagem de programação utilizada foi C++, com auxílio das IDEs Geany e CodeLite.
+Acreditamos que a linguagem é adequada para a construção de um compilador, pois 
+apresenta tanto rescursos de mais alto nível (como orientação a objetos), quanto 
+recursos de mais baixo nível (como manipulação direta de ponteiros) e por ser também 
+uma linguagem compilada prática e de alto desempenho.
+
+Arquivos fonte e arquivos gerados nesse projeto-------------------------------------
+------------------------------------------------------------------------------------
+Na pasta src se econtra o código do projeto. Além do arquivo que contém o bloco 
+principal (main.cpp), cada classe possui um arquivo .h (arquivo de cabeçalho, contendo o
+nome das variáveis e métodos da classe, assim como as bibliotecas que serão utilizadas
+por ela) e um arquivo .cpp (que contém a implementação dos métodos da classe. As 
+seguintes classes estão presentes nesse projeto e serão descritas posteriormente:
+Helper
+Token
+LexicalAnalyser
+Parser
+ToquenQueue
+CodeGenerator
+
+ConstEntry	(src/entry)
+FieldEntry	(src/entry)
+FunctionEntry	(src/entry)
+ProcedureEntry	(src/entry)
+SymbolTableEntry(src/entry)
+TypeEntry	(src/entry)
+VarEntry	(src/entry)
+
+ArrayType	(src/type)
+DimensionType	(src/type)
+FieldListType	(src/type)
+OfType		(src/type)
+Type		(src/type)	
+
+########################### Método principal (main) ##################################
+######################################################################################
+É a partir dessse método que o programa se inicia. Nele, o nome do arquivo a ser 
+compilado é lido e verifica-se se esse arquivo existe e se possui a extensão correta
+(.pas). Em seguida, duas threads são iniciadas: uma que executa o analisador léxico e
+outra que executa o analisador sintático. Isso ocorre porque em nosso projeto, o
+analisador léxico e sintático funcionam como um problema do produtor consumidor, onde
+o léxico produz tokens e deposita em um buffer e o o analisador sintático consome os 
+tokens do buffer e realiza o devido processamento. Esse forma de se enxergar o problema
+é interessante pois o analisador léxico muitas vezes fica bloqueado esperando a leitura
+do arquivo e enquanto isso o sistema operacional pode colocar o analisador sintático 
+para processar os tokens já produzidos.
+
+############################### Classe Token #########################################
+######################################################################################
+Essa classe guarda informações acerca de uma Token: lexema (valor), tipo, linha e
+coluna onde ela se inicia no código analisado. Além disso, a classe define uma série 
+de constantes que identificam cada tipo de token (palavras chave, operadores, 
+símbolos, etc.)
+
+############################## Classe Helper #########################################
+######################################################################################
+Essa classe possui uma série de HashTabels e listas que identificam dígitos, letras, 
+separadores e delimitadores da linguagem pascal, além de associar cada palavra chave,
+símbolo e operador do pascal a sua respectiva constante definida na classe Token. Seu
+obejetivo é facilitar a identificação e diferenciação de tokens pelo analisador 
+sintático.
+
+########################### Classe LexicalAnalyser ###################################
+######################################################################################
+Como o próprio nome sugere, essa é a classe que realiza a análise léxica. Seus métodos
+são executados em uma das duas threads criadas no main. O analisador léxico lê 
+caracter por caracter do arquivo fonte e, sabendo quais são os caracteres separadores
+e delimitadores da linguagem pascal, separa as tokens e com auxílio da classe helper
+identifica se a token é um operador, um símbolo, um identificador, etc. A constante
+que define que os identificadores é a última definia na classe token e qualquer token
+que tenha um tipo cujo valor numérico é maior do que ela é considerada um 
+identificador. É uma solução simples e de baixo custo de memória para que o 
+programador possa usar quantos identificadores quiser (limitado apenas pela memória
+física, obviamente). Os tokens separados são inseridos em uma lista e no buffer e 
+assim que o analisador léxico termina de ler o arquivo fonte ele imprime em um arquivo
+de saída(saida.txt) as informações de cada token lida no formato de uma tabela. Foi 
+construído também um método que coloca na tela as informações sobre as tokens, mas 
+decidimos posteriormente usar a tela apenas para exibir os erros de compilação. Nesse 
+ponto do programa os erros léxicos são armazenados em tokens de erro.
+
+############################# Classe Parser #########################################
+#####################################################################################
+A classe parser corresponder ao analisador sintático. Ele consome as tokens 
+depositadas pelo analisador sintático no buffer e verifica se a sequência de tokens
+respeita a gramática da linguagem pascal. Para isso utilizamos o método de análise
+sintática descedente preditiva recursiva, com base n grafos sintáticos de uma 
+gramárica LL(1) da linguagem pascal oferecida no livro do Setzer e nas orientações
+recebidas em sala de aula para construir rotinas a partir dos grafos.
+
+########################## Classe TokenQueue #######################################
+####################################################################################
+Essa classe é responsável pela comunicação e sincronização entre as threads do 
+analisador léxico e sintático, oferencendo exclusão mútua no acesso ao buffer e
+bloqueando o analisador sintático quando não há mais tokens a serem processadas
+no momento. Isso permite que o analisador léxico tempo mais tempo de UCP para
+realizar seu trabalho e o analisador léxico não realize processamento inútil
+
+############################ Classes *Entry ########################################
+####################################################################################
+A análise semântica é feita ad hoc nesse projeto, portanto as rotinas que tratam da
+análise semântica estão inseridas nas rotinas sintáticas e se baseiam também no 
+grafo sintático. Esse conjunto de classes é utilizado como estrutura de dados 
+auxiliar para guardar informações sobre os diferetes tipo de identificadores 
+(identificadors de tipo, variável, procedimento, função, etc.). Assim, é possível
+saber se uma variável que está sendo usada foi declarada, se foi declarada e não
+foi usada, se foi declarada mais de uma vez no mesmo escopo, se exsite no escopo,
+etc. e consequentemente informar o programador sobre erros semânticos. Todas as
+classes terminadas em Entry herdam a classe SymbolTableEntry, que possue o atributos
+comum a todos tipode de identificadores.
+
+############################### Classes *Type ######################################
+####################################################################################
+As classes terminadas em Type auxiliam tanto o analisador semântico, quanto a 
+geração de código, pois guardam informações sobre os diferentes tipo de dados da
+linguagem pascal, tais como vetores, matrizes, records, etc.
+Exemplo: quando um vetor é declarado, é necessário armazenar seu tamanho, bem como
+o endereço inicial
+
+############################# Classe CodeGenerator ##################################
+#####################################################################################
+A geração de código também é feita ad hoc, com auxílio do grafo sintático, porém com
+auxílio da classe CodeGenerator. Conforme orientado pelo professor, fizemos a geração
+de código apenas para a rotina principal, embora a análise léxica, sintática e
+semântica consiga avaliar qualquer código em pascal.
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!  Arquivos de exemplo  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Existem 20 arquivos de exemplo na pasta Debug, com os nomes EX1-EX20. Esses exemplos
+podem ser usados para testar a análise léxica, sintática e semântica do compilador e
+são baseados nos exemplos oferecidos pelo professor. Não é possível porém, gerar 
+código a partir desses arquivos, já que a maior parte deles contém subrotinas.
+Porém, é possível compilar e gerar código do arquivo GeraCodigo.pas, que contém um
+exemplo de código em pascal que não possui sub-rotinas.
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!! Arquivos gerados pelo compilador !!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+O compilador gera dois arquivos após sua execução. Um arquivo com o nome genérico
+"saida.txt", gerado pelo analisador léxico e que mostra as informações sobre todas as
+tokens identificadas em uma tabela de tokens e um outro arquivo com o mesmo nome do
+arquivo analisado, porém com a extensão .mepa, que possui o código mepa gerado a 
+partir do código fonte

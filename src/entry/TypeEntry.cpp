@@ -6,7 +6,7 @@ TypeEntry::TypeEntry(Token token, int scope) : SymbolTableEntry(token, scope)
     code = ++CODE_COUNTER;
 }
 
-TypeEntry::getCode()
+int TypeEntry::getCode()
 {
     return code;
 }
