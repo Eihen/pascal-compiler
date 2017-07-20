@@ -59,7 +59,7 @@ namespace std
 		void aux_filist_p2();
 		void aux_filist_p3();
 		void filist();
-		void infipo();
+		bool infipo();
 		void factor();
 		void term();
 		void siexpr();

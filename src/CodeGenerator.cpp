@@ -27,11 +27,27 @@ void CodeGenerator::label(string labelNum)
     mepaFile << "LABEL" << labelNum << ":\n";
 }
 
-int CodeGenerator::variables(unsigned long count)
+int CodeGenerator::getMemCount()
 {
-    mepaFile << "AMEM " << count << "\n";
-    varCount += count;
-    return varCount;
+    return memCount + 1;
+}
+
+void CodeGenerator::allocMemory(unsigned long memorySize)
+{
+    if (memorySize > 0)
+    {
+        mepaFile << "AMEM " << memorySize << "\n";
+        memCount += memorySize;
+    }
+}
+
+void CodeGenerator::freeMemory(unsigned long memorySize)
+{
+    if (memorySize > 0)
+    {
+        mepaFile << "DMEM " << memorySize << "\n";
+        memCount -= memorySize;
+    }
 }
 
 void CodeGenerator::invert()
@@ -103,3 +119,65 @@ void CodeGenerator::loadConstant(string value)
 {
     mepaFile << "CRCT " << value << "\n";
 }
+
+void CodeGenerator::loadVariable(int scope, int address)
+{
+    mepaFile << "CRVL " << scope << ", " << address << "\n";
+}
+
+void CodeGenerator::createTempAddress(int scope, int address)
+{
+    memCount++;
+    mepaFile << "CRCT " << address << "\n" //Carrega o endereço inicial da variável
+             << "SOMA\n" // Soma com o resultado da expressão do infipo
+             << "AMEM 1\n" //Aloca memória para armazenar o endereço temporário
+             << "ARMZ " << scope << ", " << memCount << "\n"; //Armazena em um espaço de memória
+}
+
+void CodeGenerator::loadFromExpr(int scope, int address)
+{
+    createTempAddress(scope, address);
+    //Carrega o valor da váriavel do endereço contido na posição especificada
+    mepaFile << "CRVI " << scope << ", " << memCount << "\n"
+             << "DMEM 1\n"; //Desaloca a memória do endereço temporário
+    memCount--;
+}
+
+void CodeGenerator::negate()
+{
+    mepaFile << "NEGA\n";
+}
+
+void CodeGenerator::assign(int scope, int address)
+{
+    mepaFile << "ARMZ " << scope << ", " << address << "\n";
+}
+
+void CodeGenerator::assignToTempAddress(int scope)
+{
+    //Assume que o endereço temporário foi criado e está na última posição de memória alocada
+    //Armazena o valor no topo da pilha na variável do endereço contido na posição especificada
+    mepaFile << "ARMI " << scope << ", " << memCount << "\n"
+             << "DMEM 1\n"; //Desaloca a memória do endereço temporário
+    memCount--;
+}
+
+void CodeGenerator::startIf()
+{
+    ifCount++;
+    mepaFile << "DSVF IF" << ifCount << "\n";
+}
+
+void CodeGenerator::genElse()
+{
+    mepaFile << "DSVS IF" << (ifCount + 1) << "\n"
+             << "IF" << ifCount << ":\n";
+    ifCount++;
+}
+
+void CodeGenerator::endIf()
+{
+    mepaFile << "IF" << ifCount << ":\n";
+}
+
+

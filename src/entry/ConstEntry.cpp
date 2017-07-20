@@ -9,3 +9,8 @@ ConstEntry::~ConstEntry()
 {
 }
 
+string ConstEntry::getValue()
+{
+    return this->value;
+}
+

@@ -11,13 +11,13 @@ public:
     VarEntry(Token token, int scope);
     void setType(Type type);
     void setMemoryPosition(int memoryPosition);
+    int getMemoryPosition();
     Type& getType();
     ~VarEntry();
     
 private:
     Type varType;
     int memoryPosition;
-
 };
 
 #endif // VARENTRY_H

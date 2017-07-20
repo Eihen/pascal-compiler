@@ -9,6 +9,8 @@ class ConstEntry : public SymbolTableEntry
 public:
     ConstEntry(Token token, int scope, string value);
     ~ConstEntry();
+
+    string getValue();
 private:
     string value;
 

@@ -104,3 +104,5 @@ pascal-project\.txt
 Debug/makefile.txt
 
 src/Teste
+
+Debug/*.mepa

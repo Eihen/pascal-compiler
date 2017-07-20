@@ -332,15 +332,20 @@ void Parser::filist()
 		}
 }
 
-void Parser::infipo()
+bool Parser::infipo()
 {
+    //ToDo
 	if(type == SMB_OPEN_BRACKET)
 	{
+        codeGenerator.loadConstant("1");
 		do
-		{
+        {
 			getToken();
 			expr();
-		}while(type == SMB_COMMA);
+            codeGenerator.hpOperation(OP_MULT);
+		}
+        while(type == SMB_COMMA);
+
 		if(type == SMB_CLOSE_BRACKET)
 		{
 			getToken();
@@ -348,25 +353,25 @@ void Parser::infipo()
 		}
 		else
 			trataErro("Símbolo ] ou , esperado");
+        return true;
 	}
-	else
-		if(type ==  SMB_DOT)
-		{
-			getToken();
-			if(isIdentifier(fieldTable))
-			{
-				getToken();
-				infipo();
-			}
-			else
-				trataErro("Identificador de campo esperado");
-		}
-		else
-			if(type == SMB_AT)
-			{
-				getToken();
-				infipo();
-			}
+	else if(type ==  SMB_DOT)
+    {
+        getToken();
+        if(isIdentifier(fieldTable))
+        {
+            getToken();
+            infipo();
+        }
+        else
+            trataErro("Identificador de campo esperado");
+    }
+    else if(type == SMB_AT)
+    {
+        getToken();
+        infipo();
+    }
+    return false;
 }
 
 void Parser::factor()
@@ -386,8 +391,22 @@ void Parser::factor()
 	else if (isIdentifier(varTable))
 	{
 		//ToDo 170
+        int address = 0;
+        typename map<string, VarEntry&>::iterator it = varTable.find(tokenHash(currentScope));
+        if (it != varTable.end())
+        {
+            address = it->second.getMemoryPosition();
+        }
 		getToken();
-		infipo();
+
+        if (infipo())
+        {
+            codeGenerator.loadFromExpr(currentScope, address);
+        }
+        else
+        {
+            codeGenerator.loadVariable(currentScope, address);
+        }
 		//ToDo 167
 	}
 	else if (isIdentifier(functionTable, 0))
@@ -430,6 +449,7 @@ void Parser::factor()
 	{
 		getToken();
 		factor();
+        codeGenerator.negate();
 		//ToDO 155
 	}
 	else if (type == SMB_OPEN_BRACKET)
@@ -460,6 +480,11 @@ void Parser::factor()
 	}
 	else if (isIdentifier(constTable))
     {
+        typename map<string, ConstEntry&>::iterator it = constTable.find(tokenHash(currentScope));
+        if (it != constTable.end())
+        {
+            codeGenerator.loadConstant(it->second.getValue());
+        }
         getToken();
     }
 	else
@@ -605,11 +630,30 @@ void Parser::statm()
     }
     //var identifier
     if (isIdentifier(varTable)) {
+        int address = 0;
+        typename map<string, VarEntry&>::iterator it = varTable.find(tokenHash(currentScope));
+        if (it != varTable.end())
+        {
+            address = it->second.getMemoryPosition();
+        }
+
         getToken();
-        infipo();
+        bool fromExpr = infipo();
+        if (fromExpr)
+        {
+            codeGenerator.createTempAddress(currentScope, address);
+        }
         if (type == OP_ASSIGN) {
             getToken();
             expr();
+            if (fromExpr)
+            {
+                codeGenerator.assignToTempAddress(currentScope);
+            }
+            else
+            {
+                codeGenerator.assign(currentScope, address);
+            }
         }
         else
             trataErro(":= esperado");
@@ -662,14 +706,18 @@ void Parser::statm()
     else if (type == KW_IF) {
         getToken();
         expr();
+        codeGenerator.startIf();
+
         if (type == KW_THEN) {
             getToken();
             statm();
             if (type == KW_ELSE) {
+                codeGenerator.genElse();
                 getToken();
                 statm();
             }
             //TODO lambda (sem getToken())
+            codeGenerator.endIf();
         }
         else
             trataErro("then esperado");
@@ -904,6 +952,7 @@ Type& Parser::read_type()
 
 void Parser::block()
 {
+    unsigned long usedMemory = 0;
     //LABEL
     if (type == KW_LABEL) {
         do {
@@ -991,8 +1040,11 @@ void Parser::block()
         if (token.isIdentifier()) {
             list<VarEntry> variables;
             Type& varType = * new Type();
+            int memCount = codeGenerator.getMemCount();
             do {
                 VarEntry& entry = * new VarEntry(token, currentScope);
+                entry.setMemoryPosition(memCount);
+                memCount++;
                 if (insertSymbol(&varTable, entry, "Variavel " + token.getValue() + " redeclarada"))
                     variables.push_back(entry);
                 getToken();
@@ -1008,13 +1060,12 @@ void Parser::block()
                     if (type == SMB_SEMICOLON) {
                         getToken();
 
-                        int varCount = codeGenerator.variables(variables.size());
+                        usedMemory = variables.size();
+                        codeGenerator.allocMemory(usedMemory);
 
                         //define o tipo das variáveis listadas
                         for (VarEntry varEntry : variables) {
                             varEntry.setType(varType);
-                            varEntry.setMemoryPosition(varCount);
-                            varCount--;
                         }
 
                         variables.clear();
@@ -1106,7 +1157,10 @@ void Parser::block()
         } while (type == SMB_SEMICOLON);
 
         if (type == KW_END)
+        {
+            codeGenerator.freeMemory(usedMemory);
             getToken();
+        }
         else
             trataErro("End esperado");
 

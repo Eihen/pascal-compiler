@@ -23,3 +23,8 @@ void VarEntry::setMemoryPosition(int memoryPosition)
     this->memoryPosition = memoryPosition;
 }
 
+int VarEntry::getMemoryPosition()
+{
+    return this->memoryPosition;
+};
+

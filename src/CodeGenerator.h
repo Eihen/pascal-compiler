@@ -16,7 +16,9 @@ namespace std
         void end();
 
         void label(string labelName);
-        int variables(unsigned long count);
+        int  getMemCount();
+        void allocMemory(unsigned long memorySize);
+        void freeMemory(unsigned long memorySize);
         void invert();
         void compare(int _operator);
         //Low priority operation
@@ -24,12 +26,24 @@ namespace std
         //High priority operation
         void hpOperation(int _operator);
         void loadConstant(string value);
-		
-	private:
-		ofstream mepaFile;
-		int varCount = -1;
+        void loadVariable(int scope, int address);
+        void createTempAddress(int scope, int address);
+        void loadFromExpr(int scope, int address);
+        void negate();
+        void assign(int scope, int address);
+        void assignToTempAddress(int scope);
 
-	};
+        void startIf();
+        void endIf();
+        void genElse();
+
+    private:
+		ofstream mepaFile;
+		int memCount = -1;
+        int ifCount = -1;
+
+
+    };
 }
 
 #endif // CODEGENERATOR_H
