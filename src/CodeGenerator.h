@@ -33,14 +33,19 @@ namespace std
         void assign(int scope, int address);
         void assignToTempAddress(int scope);
 
-        void startIf();
-        void endIf();
-        void genElse();
+        int startIf();
+        void genElse(int ifNumeber);
+        void endIf(int ifNumber);
+
+        int startWhile();
+        void evaluateWhile(int whileNumber);
+        void endWhile(int whileNumber);
 
     private:
 		ofstream mepaFile;
 		int memCount = -1;
         int ifCount = -1;
+        int whileCount = -1;
 
 
     };

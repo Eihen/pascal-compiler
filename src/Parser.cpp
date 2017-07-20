@@ -706,18 +706,18 @@ void Parser::statm()
     else if (type == KW_IF) {
         getToken();
         expr();
-        codeGenerator.startIf();
+        int ifNumber = codeGenerator.startIf();
 
         if (type == KW_THEN) {
             getToken();
             statm();
             if (type == KW_ELSE) {
-                codeGenerator.genElse();
+                codeGenerator.genElse(ifNumber);
                 getToken();
                 statm();
             }
             //TODO lambda (sem getToken())
-            codeGenerator.endIf();
+            codeGenerator.endIf(ifNumber);
         }
         else
             trataErro("then esperado");
@@ -772,10 +772,13 @@ void Parser::statm()
     //while
     else if (type == KW_WHILE) {
         getToken();
+        int whileNumber = codeGenerator.startWhile();
         expr();
+        codeGenerator.evaluateWhile(whileNumber);
         if (type == KW_DO) {
             getToken();
             statm();
+            codeGenerator.endWhile(whileNumber);
         }
         else
             trataErro("'do' esperado");

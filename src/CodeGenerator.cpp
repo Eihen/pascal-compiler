@@ -14,12 +14,12 @@ CodeGenerator::~CodeGenerator()
 void CodeGenerator::begin(string fileName)
 {
     mepaFile.open(fileName + ".mepa");
-    mepaFile << "INPP\n";
+    mepaFile << "\tINPP\n";
 }
 
 void CodeGenerator::end()
 {
-    mepaFile << "PARA";
+    mepaFile << "\tPARA";
 }
 
 void CodeGenerator::label(string labelNum)
@@ -36,7 +36,7 @@ void CodeGenerator::allocMemory(unsigned long memorySize)
 {
     if (memorySize > 0)
     {
-        mepaFile << "AMEM " << memorySize << "\n";
+        mepaFile << "\tAMEM " << memorySize << "\n";
         memCount += memorySize;
     }
 }
@@ -45,14 +45,14 @@ void CodeGenerator::freeMemory(unsigned long memorySize)
 {
     if (memorySize > 0)
     {
-        mepaFile << "DMEM " << memorySize << "\n";
+        mepaFile << "\tDMEM " << memorySize << "\n";
         memCount -= memorySize;
     }
 }
 
 void CodeGenerator::invert()
 {
-    mepaFile << "INVR\n";
+    mepaFile << "\tINVR\n";
 }
 
 void CodeGenerator::compare(int _operator)
@@ -60,22 +60,22 @@ void CodeGenerator::compare(int _operator)
     switch(_operator)
     {
         case OP_EQUALS:
-            mepaFile << "CMIG\n";
+            mepaFile << "\tCMIG\n";
             break;
         case OP_LOWER:
-            mepaFile << "CMME\n";
+            mepaFile << "\tCMME\n";
             break;
         case OP_HIGHER:
-            mepaFile << "CMMA\n";
+            mepaFile << "\tCMMA\n";
             break;
         case OP_DIFF:
-            mepaFile << "CMDG\n";
+            mepaFile << "\tCMDG\n";
             break;
         case OP_LOWER_EQUALS:
-            mepaFile << "CMEG\n";
+            mepaFile << "\tCMEG\n";
             break;
         case OP_HIGHER_EQUALS:
-            mepaFile << "CMAG\n";
+            mepaFile << "\tCMAG\n";
             break;
         default: break;
     }
@@ -86,13 +86,13 @@ void CodeGenerator::lpOperation(int _operator)
     switch(_operator)
     {
         case OP_PLUS:
-            mepaFile << "SOMA\n";
+            mepaFile << "\tSOMA\n";
             break;
         case OP_MINUS:
-            mepaFile << "SUBT\n";
+            mepaFile << "\tSUBT\n";
             break;
         case KW_OR:
-            mepaFile << "DISJ\n";
+            mepaFile << "\tDISJ\n";
             break;
         default: break;
     }
@@ -103,13 +103,13 @@ void CodeGenerator::hpOperation(int _operator)
     switch(_operator)
     {
         case OP_MULT:
-            mepaFile << "MULT\n";
+            mepaFile << "\tMULT\n";
             break;
         case OP_DIV:
-            mepaFile << "DIVI\n";
+            mepaFile << "\tDIVI\n";
             break;
         case KW_AND:
-            mepaFile << "CONJ\n";
+            mepaFile << "\tCONJ\n";
             break;
         default: break;
     }
@@ -117,67 +117,87 @@ void CodeGenerator::hpOperation(int _operator)
 
 void CodeGenerator::loadConstant(string value)
 {
-    mepaFile << "CRCT " << value << "\n";
+    mepaFile << "\tCRCT " << value << "\n";
 }
 
 void CodeGenerator::loadVariable(int scope, int address)
 {
-    mepaFile << "CRVL " << scope << ", " << address << "\n";
+    mepaFile << "\tCRVL " << scope << ", " << address << "\n";
 }
 
 void CodeGenerator::createTempAddress(int scope, int address)
 {
     memCount++;
-    mepaFile << "CRCT " << address << "\n" //Carrega o endereço inicial da variável
-             << "SOMA\n" // Soma com o resultado da expressão do infipo
-             << "AMEM 1\n" //Aloca memória para armazenar o endereço temporário
-             << "ARMZ " << scope << ", " << memCount << "\n"; //Armazena em um espaço de memória
+    mepaFile << "\tCRCT " << address << "\n" //Carrega o endereço inicial da variável
+             << "\tSOMA\n" // Soma com o resultado da expressão do infipo
+             << "\tAMEM 1\n" //Aloca memória para armazenar o endereço temporário
+             << "\tARMZ " << scope << ", " << memCount << "\n"; //Armazena em um espaço de memória
 }
 
 void CodeGenerator::loadFromExpr(int scope, int address)
 {
     createTempAddress(scope, address);
     //Carrega o valor da váriavel do endereço contido na posição especificada
-    mepaFile << "CRVI " << scope << ", " << memCount << "\n"
-             << "DMEM 1\n"; //Desaloca a memória do endereço temporário
+    mepaFile << "\tCRVI " << scope << ", " << memCount << "\n"
+             << "\tDMEM 1\n"; //Desaloca a memória do endereço temporário
     memCount--;
 }
 
 void CodeGenerator::negate()
 {
-    mepaFile << "NEGA\n";
+    mepaFile << "\tNEGA\n";
 }
 
 void CodeGenerator::assign(int scope, int address)
 {
-    mepaFile << "ARMZ " << scope << ", " << address << "\n";
+    mepaFile << "\tARMZ " << scope << ", " << address << "\n";
 }
 
 void CodeGenerator::assignToTempAddress(int scope)
 {
     //Assume que o endereço temporário foi criado e está na última posição de memória alocada
     //Armazena o valor no topo da pilha na variável do endereço contido na posição especificada
-    mepaFile << "ARMI " << scope << ", " << memCount << "\n"
-             << "DMEM 1\n"; //Desaloca a memória do endereço temporário
+    mepaFile << "\tARMI " << scope << ", " << memCount << "\n"
+             << "\tDMEM 1\n"; //Desaloca a memória do endereço temporário
     memCount--;
 }
 
-void CodeGenerator::startIf()
+int CodeGenerator::startIf()
 {
-    ifCount++;
-    mepaFile << "DSVF IF" << ifCount << "\n";
+    ifCount += 2;
+    mepaFile << "\tDSVF IF" << (ifCount - 1) << "\n";
+    return ifCount;
 }
 
-void CodeGenerator::genElse()
+void CodeGenerator::genElse(int ifNumber)
 {
-    mepaFile << "DSVS IF" << (ifCount + 1) << "\n"
-             << "IF" << ifCount << ":\n";
+    mepaFile << "\tDSVS IF" << ifNumber << "\n"
+             << "IF" << (ifNumber - 1) << ":\n";
     ifCount++;
 }
 
-void CodeGenerator::endIf()
+void CodeGenerator::endIf(int ifNumber)
 {
-    mepaFile << "IF" << ifCount << ":\n";
+    mepaFile << "IF" << ifNumber << ":\n";
+}
+
+int CodeGenerator::startWhile()
+{
+    whileCount+=2;
+    mepaFile << "WHILE" << whileCount - 1 << ":\n";
+    return whileCount;
+}
+
+void CodeGenerator::evaluateWhile(int whileNumber)
+{
+    mepaFile << "\tDSVF WHILE" << whileNumber << "\n";
+}
+
+
+void CodeGenerator::endWhile(int whileNumber)
+{
+    mepaFile << "\tDSVS WHILE" << whileNumber - 1 << "\n";
+    mepaFile << "WHILE" << whileNumber << ":\n";
 }
 
 
