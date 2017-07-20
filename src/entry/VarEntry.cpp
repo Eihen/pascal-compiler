@@ -18,3 +18,8 @@ VarEntry::~VarEntry()
 {
 }
 
+void VarEntry::setMemoryPosition(int memoryPosition)
+{
+    this->memoryPosition = memoryPosition;
+}
+

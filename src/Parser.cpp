@@ -26,23 +26,23 @@ Parser::Parser(TokenQueue* _tokenQueue)
 		}
 
     //warnings
-    for (pair<string, VarEntry&> mapPair : varTable)
+    for (pair<const string, VarEntry &> & mapPair : varTable)
         if (!mapPair.second.isReferenced())
             cout << "Variavel " << mapPair.second.getIdentifier() << " nao utilizada." << endl;
 
-    for (pair<string, ConstEntry&> mapPair : constTable)
+    for (pair<const string, ConstEntry &> & mapPair : constTable)
         if (!mapPair.second.isReferenced())
             cout << "Constante " << mapPair.second.getIdentifier() << " nao utilizada." << endl;
 
-    for (pair<string, TypeEntry&> mapPair : typeTable)
+    for (pair<const string, TypeEntry &> & mapPair : typeTable)
         if (!mapPair.second.isReferenced())
             cout << "Tipo " << mapPair.second.getIdentifier() << " nao utilizado." << endl;
 
-    for (pair<string, FunctionEntry&> mapPair : functionTable)
+    for (pair<const string, FunctionEntry &> & mapPair : functionTable)
         if (!mapPair.second.isReferenced())
             cout << "Função " << mapPair.second.getIdentifier() << " nao utilizada." << endl;
 
-    for (pair<string, ProcedureEntry&> mapPair : procedureTable)
+    for (pair<const string, ProcedureEntry &> & mapPair : procedureTable)
         if (!mapPair.second.isReferenced())
             cout << "Procedimento " << mapPair.second.getIdentifier() << " nao utilizado." << endl;
 }
@@ -371,13 +371,15 @@ void Parser::infipo()
 
 void Parser::factor()
 {
-	if (type == LIT_INT || type == LIT_FLOAT || type == KW_TRUE || type == KW_FALSE)
+	if (type == LIT_INT || type == LIT_FLOAT || type == KW_TRUE || type == KW_FALSE || type == LIT_STRING)
 	{
+        codeGenerator.loadConstant(token.getValue());
 		//ToDo 73
 		getToken();
 	}
 	else if (type == KW_NIL)
 	{
+        codeGenerator.loadConstant(0);
 		//ToDo 110
 		getToken();
 	}
@@ -456,30 +458,45 @@ void Parser::factor()
 			}
 		}
 	}
-	else if (isIdentifier(constTable) || type == LIT_STRING)
-		getToken();
+	else if (isIdentifier(constTable))
+    {
+        getToken();
+    }
 	else
 		trataErro("Literal, NIL, identificador, (, NOT ou [ esperado");
 }
 
 void Parser::term()
 {
-	do {
-		factor();
-		//ToDo 153
-	} while( verify_and_get(type == OP_MULT || type == OP_DIV || type == KW_DIV || type == KW_MOD || type == KW_AND) );
+    factor();
+
+    while(type == OP_MULT || type == OP_DIV || type == KW_DIV || type == KW_MOD || type == KW_AND)
+    {
+        int _operator = type;
+        getToken();
+        factor();
+        //ToDo 153
+        codeGenerator.hpOperation(_operator);
+    }
 }
 
 void Parser::siexpr()
 {
-	if (type == OP_PLUS || type == OP_MINUS)
+    bool invert;
+	if (type == OP_PLUS || (invert = type == OP_MINUS))
 		getToken();
 	term();
+
+    if (invert)
+        codeGenerator.invert();
+
 	//ToDo 152
 	while(type == OP_PLUS || type == OP_MINUS || type == KW_OR)
 	{
+        int _operator = type;
 		getToken();
 		term();
+        codeGenerator.lpOperation(_operator);
 	}
 }
 
@@ -489,9 +506,11 @@ void Parser::expr()
 	if (type == OP_EQUALS || type == OP_LOWER || type == OP_HIGHER || type == OP_DIFF || type == OP_HIGHER_EQUALS
 		|| type == OP_LOWER_EQUALS || type == KW_IN)
 	{
+        int _operator = type;
 		getToken();
 		siexpr();
 		//ToDo 156
+        codeGenerator.compare(_operator);
 	}
 }
 
@@ -577,6 +596,7 @@ void Parser::statm()
 {
     //number
     if (token.isNumber()) {
+        codeGenerator.label(token.getValue());
         getToken();
         if (type == SMB_COLON)
 			getToken();
@@ -909,12 +929,13 @@ void Parser::block()
         getToken();
         if (token.isIdentifier()) {
             do {
-				//registra token na tabela
-                insertSymbol(&constTable, * new ConstEntry(token, currentScope), "Constante " + token.getValue() + " redeclarada");
-                getToken();
+				getToken();
                 if (type == OP_EQUALS) {
                     getToken();
-                    constant();
+
+                    //registra token na tabela
+                    insertSymbol(&constTable, * new ConstEntry(token, currentScope, constant()), "Constante " + token.getValue() + " redeclarada");
+
                     if (type == SMB_SEMICOLON) {
                         getToken();
                         //se for identificador: continuará o laço; caso contrário, continuará leitura do bloco
@@ -987,9 +1008,14 @@ void Parser::block()
                     if (type == SMB_SEMICOLON) {
                         getToken();
 
+                        int varCount = codeGenerator.variables(variables.size());
+
                         //define o tipo das variáveis listadas
-                        for (VarEntry varEntry : variables)
+                        for (VarEntry varEntry : variables) {
                             varEntry.setType(varType);
+                            varEntry.setMemoryPosition(varCount);
+                            varCount--;
+                        }
 
                         variables.clear();
                         //se não for identificador, sairá do laço
@@ -1095,11 +1121,13 @@ void Parser::progrm()
     if (type == KW_PROGRAM) {
         getToken();
         if (token.isIdentifier()) {
+			codeGenerator.begin(token.getValue());
             getToken();
             if (type == SMB_OPEN_PARENT) {
                 do {
                     getToken();
                     if (token.isIdentifier()) {
+                        //ToDo
                         getToken();
                         if (type != SMB_COMMA && type != SMB_CLOSE_PARENT) {
                             trataErro("Vírgula ou parenteses esperado");
@@ -1117,6 +1145,7 @@ void Parser::progrm()
                 if (type == SMB_SEMICOLON) {
                     getToken();
                     block();
+                    codeGenerator.end();
                     if (type != SMB_DOT)
                         trataErro("Ponto esperado");
                 }

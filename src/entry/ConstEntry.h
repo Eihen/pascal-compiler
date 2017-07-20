@@ -7,8 +7,10 @@
 class ConstEntry : public SymbolTableEntry
 {
 public:
-    ConstEntry(Token token, int scope);
+    ConstEntry(Token token, int scope, string value);
     ~ConstEntry();
+private:
+    string value;
 
 };
 
