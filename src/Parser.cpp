@@ -19,11 +19,14 @@ Parser::Parser(TokenQueue* _tokenQueue)
 	if(errorQueue.empty())
 		cout << "Compilacao terminada com sucessso" << endl;
 	else
-		while(!errorQueue.empty())
-		{
-			cout << errorQueue.front() << endl;
-			errorQueue.pop();
-		}
+    {
+        codeGenerator.remove();
+        while (!errorQueue.empty())
+        {
+            cout << errorQueue.front() << endl;
+            errorQueue.pop();
+        }
+    }
 
     //warnings
     for (pair<const string, VarEntry &> & mapPair : varTable)

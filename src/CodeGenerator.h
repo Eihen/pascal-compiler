@@ -14,6 +14,7 @@ namespace std
 
         void begin(string fileName);
         void end();
+        void remove();
 
         void label(string labelName);
         int  getMemCount();
@@ -43,6 +44,7 @@ namespace std
         void goTo(string labelNumber);
 
     private:
+		string fileName;
 		ofstream mepaFile;
 		int memCount = -1;
         int ifCount = -1;

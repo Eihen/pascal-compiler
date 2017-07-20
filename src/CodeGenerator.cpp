@@ -13,6 +13,7 @@ CodeGenerator::~CodeGenerator()
 
 void CodeGenerator::begin(string fileName)
 {
+    this->fileName = fileName + ".mepa";
     mepaFile.open(fileName + ".mepa");
     mepaFile << "\tINPP\n";
 }
@@ -20,6 +21,12 @@ void CodeGenerator::begin(string fileName)
 void CodeGenerator::end()
 {
     mepaFile << "\tPARA";
+    mepaFile.close();
+}
+
+void CodeGenerator::remove()
+{
+    std::remove(fileName.c_str());
 }
 
 void CodeGenerator::label(string labelNum)
